@@ -1,0 +1,541 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Tiles And Components - Bevy Minesweeper Tutorial</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html" class="active"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#tiles-and-components" id="tiles-and-components">Tiles and Components</a></h1>
+<h2><a class="header" href="#assets" id="assets">Assets</a></h2>
+<p>Let's complete our board, for this we will need <em>assets</em>:</p>
+<ul>
+<li>A bomb png texture</li>
+<li>A font</li>
+</ul>
+<p>(You can use the assets from the <a href="https://gitlab.com/qonfucius/incubator/minesweeper/minesweeper-tutorial/-/tree/master/assets">tutorial repository</a>)</p>
+<p>Place your assets in an <code>assets</code> folder at the root of your project</p>
+<pre><code>├── Cargo.lock
+├── Cargo.toml
+├── assets
+│   ├── fonts
+│   │   └── my_font.ttf
+│   └── sprites
+│       ├── bomb.png
+├── board_plugin
+│   ├── Cargo.toml
+│   └── src
+│       ├── components
+│       ├── lib.rs
+│       └── resources
+├── src
+│   └── main.rs
+</code></pre>
+<p>Let's load these assets in our <code>create_board</code> startup system.
+For this we need to add an argument to the system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> pub fn create_board(
+        mut commands: Commands,
+        board_options: Option&lt;Res&lt;BoardOptions&gt;&gt;,
+        window: Res&lt;WindowDescriptor&gt;,
+        asset_server: Res&lt;AssetServer&gt;, // The AssetServer resource
+    ) {
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>AssetServer</code> resource allows loading files from the <code>assets</code> folder.</p>
+<p>We can now load our assets right at the beginning of the function and retrieve handles:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+    let font = asset_server.load(&quot;fonts/pixeled.ttf&quot;);
+    let bomb_image = asset_server.load(&quot;sprites/bomb.png&quot;);
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#component-declaration" id="component-declaration">Component declaration</a></h2>
+<p>Our tile map knows which tile is a bomb, a bomb neighbor or empty, but the ECS doesn't.
+Let's declare components we will attach to our tile entities in our plugin under <code>board_plugin/components</code> with our <code>Coordinates</code> component:</p>
+<ul>
+<li><code>board_plugin/src/components/bomb.rs</code></li>
+<li><code>board_plugin/src/components/bomb_neighbor.rs</code></li>
+<li><code>board_plugin/src/components/uncover.rs</code></li>
+</ul>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/components/mod.rs
+pub use bomb::Bomb;
+pub use bomb_neighbor::BombNeighbor;
+pub use uncover::Uncover;
+
+mod bomb;
+mod bomb_neighbor;
+mod uncover;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#bomb" id="bomb">Bomb</a></h3>
+<p>This component will identify a tile as a <strong>bomb</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// bomb.rs
+use bevy::prelude::Component;
+
+/// Bomb component
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct Bomb;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#bomb-neighbor" id="bomb-neighbor">Bomb neighbor</a></h3>
+<p>This component will identify a tile as <em>bomb neighbor</em></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::Component;
+
+/// Bomb neighbor component
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct BombNeighbor {
+    /// Number of neighbor bombs
+    pub count: u8,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#uncover" id="uncover">Uncover</a></h3>
+<p>This component will identify tiles to uncover, we will use it in <a href="./6_covering&amp;uncovering.html">part 6</a></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::Component;
+
+/// Uncover component, indicates a covered tile that should be uncovered
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct Uncover;
+<span class="boring">}
+</span></code></pre></pre>
+<hr />
+<p>Let's register the components for the debug inspector in our plugin:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+#[cfg(feature = &quot;debug&quot;)]
+use bevy_inspector_egui::RegisterInspectable;
+use components::*;
+
+impl Plugin for BoardPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        // ..
+        #[cfg(feature = &quot;debug&quot;)]
+        {
+            // registering custom component to be able to edit it in inspector
+            app.register_inspectable::&lt;Coordinates&gt;();
+            app.register_inspectable::&lt;BombNeighbor&gt;();
+            app.register_inspectable::&lt;Bomb&gt;();
+            app.register_inspectable::&lt;Uncover&gt;();
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#component-use" id="component-use">Component use</a></h2>
+<p>Let's create a function for <code>BoardPlugin</code> creating a <code>Text2DBundle</code> for our bomb counters:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Generates the bomb counter text 2D Bundle for a given value
+fn bomb_count_text_bundle(count: u8, font: Handle&lt;Font&gt;, size: f32) -&gt; Text2dBundle {
+    // We retrieve the text and the correct color
+    let (text, color) = (
+        count.to_string(),
+        match count {
+            1 =&gt; Color::WHITE,
+            2 =&gt; Color::GREEN,
+            3 =&gt; Color::YELLOW,
+            4 =&gt; Color::ORANGE,
+            _ =&gt; Color::PURPLE,
+        },
+    );
+    // We generate a text bundle
+    Text2dBundle {
+        text: Text {
+            sections: vec![TextSection {
+                value: text,
+                style: TextStyle {
+                    color,
+                    font,
+                    font_size: size,
+                },
+            }],
+            alignment: TextAlignment {
+                vertical: VerticalAlign::Center,
+                horizontal: HorizontalAlign::Center,
+            },
+        },
+        transform: Transform::from_xyz(0., 0., 1.),
+        ..Default::default()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>It takes in parameter:</p>
+<ul>
+<li><code>count</code>: the neighboring bomb count to print</li>
+<li><code>font</code>: a asset <code>Handle</code> of our font</li>
+<li><code>size</code>: a text size</li>
+</ul>
+<p>The colors are completely arbitrary.
+Again, we put the <code>z</code> value of the <code>Transform</code> translation to <code>1.</code> so the text is printed on top of the tile.</p>
+<p>We can now move our tile spawning loop into a distinct function:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+fn spawn_tiles(
+        parent: &amp;mut ChildBuilder,
+        tile_map: &amp;TileMap,
+        size: f32,
+        padding: f32,
+        color: Color,
+        bomb_image: Handle&lt;Image&gt;,
+        font: Handle&lt;Font&gt;,
+    ) {
+        // Tiles
+        for (y, line) in tile_map.iter().enumerate() {
+            for (x, tile) in line.iter().enumerate() {
+                let coordinates = Coordinates {
+                  x: x as u16,
+                  y: y as u16,
+                };
+                let mut cmd = parent.spawn();
+                cmd.insert_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color,
+                        custom_size: Some(Vec2::splat(size - padding)),
+                        ..Default::default()
+                    },
+                    transform: Transform::from_xyz(
+                        (x as f32 * size) + (size / 2.),
+                        (y as f32 * size) + (size / 2.),
+                        1.,
+                    ),
+                    ..Default::default()
+                })
+                .insert(Name::new(format!(&quot;Tile ({}, {})&quot;, x, y)))
+                .insert(coordinates);
+            }
+        }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<ul>
+<li>Notice we now use a temporary <code>cmd</code> value for our entity builder*</li>
+</ul>
+<p>We can now call it from our <code>create_board</code> startup system, in our <code>with_children</code> block after the background spawn:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+    Self::spawn_tiles(
+        parent,
+        &amp;tile_map,
+        tile_size,
+        options.tile_padding,
+        Color::GRAY,
+        bomb_image,
+        font,
+    );
+<span class="boring">}
+</span></code></pre></pre>
+<p>Then we complete our <code>spawn_tiles</code> function to add our bombs sprites and counter texts inside the double <code>for</code> loop:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::tile::Tile;
+
+// ..
+    match tile {
+                    // If the tile is a bomb we add the matching component and a sprite child
+                    Tile::Bomb =&gt; {
+                        cmd.insert(Bomb);
+                        cmd.with_children(|parent| {
+                            parent.spawn_bundle(SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(Vec2::splat(size - padding)),
+                                    ..Default::default()
+                                },
+                                transform: Transform::from_xyz(0., 0., 1.),
+                                texture: bomb_image.clone(),
+                                ..Default::default()
+                            });
+                        });
+                    }
+                    // If the tile is a bomb neighbour we add the matching component and a text child
+                    Tile::BombNeighbor(v) =&gt; {
+                        cmd.insert(BombNeighbor { count: *v });
+                        cmd.with_children(|parent| {
+                            parent.spawn_bundle(Self::bomb_count_text_bundle(
+                                *v,
+                                font.clone(),
+                                size - padding,
+                            ));
+                        });
+                    }
+                    Tile::Empty =&gt; (),
+                }
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Until now all tiles had identical components like <code>Coordinates</code>, <code>Transform</code>, <code>Sprite</code>, etc.
+But now some tiles have:</p>
+<ul>
+<li>A <code>Bomb</code> component and a child entity with the bomb sprite</li>
+<li>A <code>BombNeighbor</code> component and a child entity with the counter text</li>
+</ul>
+<blockquote>
+<p>We added a texture to the bomb sprite, what about the others?</p>
+</blockquote>
+<p>By default, a white square texture is used if no <code>texture</code> is specified on <code>SpriteBundle</code>. In Part 9 we will see it in more detail.</p>
+<p>Let's run our app and get our beautiful board:</p>
+<p><img src="docs/5_board.png" alt="Board" /></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="4_the_board.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="6_input_management.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="4_the_board.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="6_input_management.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

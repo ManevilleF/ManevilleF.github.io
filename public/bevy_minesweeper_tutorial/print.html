@@ -1,0 +1,3185 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Bevy Minesweeper Tutorial</title>
+        
+        <meta name="robots" content="noindex" />
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#introduction" id="introduction">Introduction</a></h1>
+<p>Hello, in this tutorial we will introduce game development in Rust using <a href="http://bevyengine.org">Bevy</a>, a free and open source data-driven game engine.</p>
+<p>The final result of this course is a cross-platform minesweeper you can test in this <a href="https://qonfucius.gitlab.io/minesweeper-tutorial/">live version</a>:</p>
+<p><img src="docs/demo.gif" alt="Demo" /></p>
+<h2><a class="header" href="#disclaimer" id="disclaimer">Disclaimer</a></h2>
+<p>The tutorial focuses on the following goals:</p>
+<ul>
+<li>Breakdown basic Bevy features and the ECS making a minesweeper</li>
+<li>Using development tools such as the inspector gui, the logger, etc.</li>
+<li>Developing a generic bevy plugin making good use of the state system and resources</li>
+<li>Having Web Assembly support</li>
+</ul>
+<blockquote>
+<p>The programming choices are not the most efficient but allow to fulfill the goals. For example, you may notice that the uncovering system has a 3 to 4 frames delay:</p>
+<ul>
+<li>frame 1: click event read and tile trigger event send</li>
+<li>frame 2: tile trigger event read and Uncover component insert</li>
+<li>frame 3: Actual uncovering</li>
+</ul>
+<p>There are better ways to do this but this way you learn to receive and send events, place components in order for a <em>system</em> to query it, etc.</p>
+</blockquote>
+<p>A decent understanding of the Rust language is a prerequisite.</p>
+<p><em>Note that this is my first Bevy project, there may be improvements so trust the latest version of the code.</em></p>
+<h2><a class="header" href="#technologies" id="technologies">Technologies</a></h2>
+<blockquote>
+<p>Why an ECS?</p>
+</blockquote>
+<p>I have experience in game development using <a href="http://unity.com">Unity3D</a> component system using C#.
+It is very user-friendly, but I think Object-oriented programming is getting obsolete, and I wanted to try an Entity component system.</p>
+<blockquote>
+<p>Unity made an ECS, why not use it?</p>
+</blockquote>
+<p>Unity is taking the leap towards ECS, but looking at the <a href="https://docs.unity3d.com/Packages/com.unity.entities@0.17/manual/index.html">documentation</a> I found it very complex and honestly, bad.
+Maybe they were forced to compromise with the existing core but it doesn't stand the comparison with Bevy's ECS.</p>
+<blockquote>
+<p>Why Rust?</p>
+</blockquote>
+<p>I love the rust language, I love game dev, I wanted to try the combination.
+Also, since I wanted to experiment with an ECS which is the incarnation of the <em>Compound VS Inheritance</em> pattern in game dev,
+using Rust is very natural.</p>
+<p>Furthermore, I find garbage collection to be a critical issue in game dev and Rust completely wipes it away.</p>
+<h2><a class="header" href="#resources" id="resources">Resources</a></h2>
+<p>We will be using the 0.6 version of the <a href="https://bevyengine.org">Bevy engine</a>:</p>
+<p>Some resources I used that you should check out:</p>
+<ul>
+<li>The <a href="https://bevy-cheatbook.github.io/">bevy cheat book</a></li>
+<li>The <a href="https://github.com/bevyengine/bevy/tree/latest/examples#examples">bevy examples</a></li>
+<li>The <a href="https://discord.gg/JjZhktEHUX">bevy discord</a> where the community is very active and helpful</li>
+</ul>
+<p>The assets I used are not mine, they are all free for personal use, please check the <em>credits</em>.</p>
+<p>I suggest you follow the tutorial using a modern IDE, like Jetbrains CLion or VS Code with the <em>Rust</em> plugin.</p>
+<h2><a class="header" href="#ecs" id="ecs">ECS</a></h2>
+<blockquote>
+<p>So what's an Entity component system?</p>
+</blockquote>
+<p>The Unity <a href="https://docs.unity3d.com/Packages/com.unity.entities@0.17/manual/index.html#">documentation</a> has a nice graphic explanation of ECS:</p>
+<p><img src="docs/1_ecs_infographic.png" alt="ECS Infographic" /></p>
+<p>It's a data-oriented coding paradigm using the following elements:</p>
+<ul>
+<li><strong>Entities</strong>: representing an object via a simple identifier (usually a classic integer)</li>
+<li><strong>Components</strong>: structures that can be attached to <strong>entities</strong>, containing data but no logic</li>
+<li><strong>Systems</strong>: functions using <strong>Component</strong> <em>queries</em> to apply logic</li>
+</ul>
+<p>The point is to apply identical logic to all <em>Health</em> components instead of applying logic to a complete object.
+It is more modular and makes it easier to manage in threads.</p>
+<p>The final element would be <strong>Resources</strong> which are data shared across <strong>systems</strong>.</p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#set-up" id="set-up">Set Up</a></h1>
+<p>One of the purposes of this tutorial is to create a <em>generic plugin</em> that can be embedded in any app.
+To do this we will initialize <strong>two</strong> nested cargo projects.</p>
+<h2><a class="header" href="#cargo-setup" id="cargo-setup">Cargo setup</a></h2>
+<p>The main binary app:</p>
+<ul>
+<li><code>cargo init --bin . --name minesweeper-tutorial </code></li>
+</ul>
+<p>And the board plugin:</p>
+<ul>
+<li><code>cargo init --lib board_plugin </code></li>
+</ul>
+<p>Your directory should look like this:</p>
+<pre><code>├── Cargo.toml
+├── board_plugin
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+└── src
+    └── main.rs
+</code></pre>
+<h2><a class="header" href="#board-plugin-config" id="board-plugin-config">Board plugin config</a></h2>
+<h3><a class="header" href="#cargotoml" id="cargotoml">Cargo.toml</a></h3>
+<p>Add the following elements to the <code>board_plugin/Cargo.toml</code> file:</p>
+<pre><code class="language-toml">[features]
+default = []
+debug = [&quot;colored&quot;, &quot;bevy-inspector-egui&quot;]
+
+[dependencies]
+# Engine
+bevy = &quot;0.6&quot;
+
+# Serialization
+serde = &quot;1.0&quot;
+
+# Random
+rand = &quot;0.8&quot;
+
+# Console Debug
+colored = { version = &quot;2.0&quot;, optional = true }
+# Hierarchy inspector debug
+bevy-inspector-egui = { version = &quot;0.8&quot;, optional = true }
+</code></pre>
+<ul>
+<li><a href="http://crates.io/crates/bevy">bevy</a> is the main engine dependency</li>
+<li><a href="http://crates.io/crates/colored">colored</a> will be used to print the board in the console in debug mode</li>
+<li><a href="http://crates.io/crates/bevy-inspector-egui">bevy-inspector-egui</a> so we can get the inspector compatibility for our components.</li>
+</ul>
+<blockquote>
+<p>Inspector GUI at the end of the tutorial:</p>
+<p><img src="docs/2_final_inspector_gui.png" alt="Inspector GUI" /></p>
+</blockquote>
+<p>We activate the debug crates through a <code>debug</code> feature gate.</p>
+<h3><a class="header" href="#librs" id="librs">lib.rs</a></h3>
+<p>Remove the generated code and create the plugin <code>struct</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/lib.rs
+pub struct BoardPlugin;
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#app-config" id="app-config">App config</a></h2>
+<h3><a class="header" href="#cargotoml-1" id="cargotoml-1">Cargo.toml</a></h3>
+<p>Add the following elements to the main <code>src/Cargo.toml</code> file:</p>
+<pre><code class="language-toml">[features]
+default = []
+debug = [&quot;board_plugin/debug&quot;, &quot;bevy-inspector-egui&quot;]
+
+[dependencies]
+bevy = &quot;0.6&quot;
+board_plugin = { path = &quot;board_plugin&quot; }
+
+# Hierarchy inspector debug
+bevy-inspector-egui = { version = &quot;0.8&quot;, optional = true }
+
+[workspace]
+members = [
+    &quot;board_plugin&quot;
+]
+</code></pre>
+<p>We use our lib as a dependency and add it to our <code>workspace</code>.</p>
+<h3><a class="header" href="#mainrs" id="mainrs">main.rs</a></h3>
+<p>Add the following to the <code>src/main.rs</code> file:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+
+#[cfg(feature = &quot;debug&quot;)]
+use bevy_inspector_egui::WorldInspectorPlugin;
+
+fn main() {
+    let mut app = App::new();
+    // Window setup
+    app.insert_resource(WindowDescriptor {
+        title: &quot;Mine Sweeper!&quot;.to_string(),
+        width: 700.,
+        height: 800.,
+        ..Default::default()
+    })
+    // Bevy default plugins
+    .add_plugins(DefaultPlugins);
+    #[cfg(feature = &quot;debug&quot;)]
+    // Debug hierarchy inspector
+    app.add_plugin(WorldInspectorPlugin::new());
+    // Startup system (cameras)
+    app.add_startup_system(camera_setup);
+    // Run the app
+    app.run();
+}
+
+fn camera_setup(mut commands: Commands) {
+    // 2D orthographic camera
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+</code></pre></pre>
+<p>Let's break it down:</p>
+<ul>
+<li>
+<p>The bevy <code>App</code> is the builder for all our game logic, allowing to register <em>systems</em>, <em>resources</em> and <em>plugins</em></p>
+</li>
+<li>
+<p>A bevy <code>Plugin</code> is a container of app building logic, a modular way to add <em>systems</em>  and <em>resources</em> to the application.</p>
+<p>For example, the <code>WorldInspectorPlugin</code> will register every <em>system</em> and <em>resource</em> required to display the GUI inspector.</p>
+</li>
+<li>
+<p>Bevy's <code>DefaultPlugins</code> is a collection of basic plugins providing basic engine features, like input handling, windows, transform, rendering..</p>
+</li>
+</ul>
+<p>We add one resource,<code>WindowDescriptor</code>to customize our window.</p>
+<blockquote>
+<p>How does adding resources makes anything ? They are just data !</p>
+</blockquote>
+<p>The resources are indeed <em>just</em> data, no logic. The <code>DefaultPlugins</code> register <em>systems</em> responsible for drawing the window using the <code>WindowDescriptor</code> resource as configuration.
+The resource is optional, because the systems with simply use default values if you don't set anything.</p>
+<p>Allowing extern customization through <em>resources</em> is what we will make with our <code>BoardPlugin</code>.</p>
+<h4><a class="header" href="#the-startup-system" id="the-startup-system">The startup system</a></h4>
+<p>We also register a <strong>Startup System</strong>: <code>camera_setup</code></p>
+<p>A classic <strong>system</strong> is run every frame, with optional run criteria like <em>Stages</em> or <em>FixedTimeSteps</em>.
+A <strong>Startup System</strong> is run only once, at the start.</p>
+<p>We register systems this way:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>app.add_system(my_function)
+<span class="boring">}
+</span></code></pre></pre>
+<p>This is the camera setup function:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn camera_setup(mut commands: Commands) {
+    // 2D orthographic camera
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>the <code>Commands</code> argument is the main ECS tool for every system that requires world editing, it allows to spawn and despawn entities, add components to entities, insert and remove resources, etc.</p>
+<blockquote>
+<p>So does every system have only one argument?</p>
+</blockquote>
+<p>Not at all, and the <code>Commands</code> argument is optional. Systems can have as many arguments as you want, but only ECS valid ones like:</p>
+<ul>
+<li><strong>Commands</strong> as we just saw (<code>Commands</code>)</li>
+<li><strong>Resources</strong> wrapped in <code>Res&lt;&gt;</code> or <code>ResMut&lt;&gt;</code> (can be assets, window or any inserted resource)</li>
+<li><strong>Component Queries</strong> (<code>Query&lt;&gt;</code>)</li>
+<li><strong>Event items</strong> (<code>EventReader&lt;&gt;</code> and <code>EventWriter&lt;&gt;</code>)</li>
+<li>etc.</li>
+</ul>
+<p>Bevy will automatically handle everything for you and provide your systems with the correct arguments.</p>
+<blockquote>
+<p>The systems &quot;spawns a bundle&quot;, what does that mean?</p>
+</blockquote>
+<p>We explained in the <a href="./introduction.html">intro</a> that in our in game world there are <strong>Entities</strong> with <strong>Components</strong> attached.</p>
+<p>To spawn an entity and add components we can do this:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn my_system(mut commands: Commands) {
+  // This spawns an entity and returns a builder
+  let entity = commands.spawn();
+  // We can add components to the entity
+  entity
+          .insert(MyComponent {})
+          .insert(MyOtherComponent {});
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>But for complex objects we use <strong>Bundles</strong> which contains a collection of <em>components</em> to add.</p>
+<p>This way we can do:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn my_system(mut commands: Commands) {
+  let entity = commands.spawn();
+  entity.insert_bundle(MyComponentBundle::new());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>or directly:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn my_system(mut commands: Commands) {
+  // This spawns an entity with all components in the bundle
+  commands.spawn_bundle(MyComponentBundle::new());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>In our system we spawn a camera entity with all the associated components to have a 2D orthographic camera.</p>
+<h2><a class="header" href="#run" id="run">Run</a></h2>
+<p>You can now run the app using</p>
+<ul>
+<li><code>cargo run</code>:
+Giving you an empty window</li>
+<li><code>cargo run --features debug</code>:</li>
+</ul>
+<p><img src="docs/2_inspector_gui.png" alt="Inspector GUI" /></p>
+<p>Showing the debug inspector, we can see our 2D camera entity, and the components inserted via the bundle.</p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#tile-map-generation" id="tile-map-generation">Tile Map Generation</a></h1>
+<p>Let's generate the minesweeper base tile map and set up our plugin.</p>
+<p>Create  a <code>components</code> module with a <code>coordinates.rs</code> file and a <code>resources</code> module with <code>tile.rs</code> and <code>tilemap.rs</code> files in <code>board_plugin</code>:</p>
+<pre><code>├── Cargo.toml
+└── src
+    ├── components
+    │   ├── coordinates.rs
+    │   └── mod.rs
+    ├── lib.rs
+    └── resources
+        ├── mod.rs
+        ├── tile.rs
+        └── tile_map.rs
+</code></pre>
+<h2><a class="header" href="#components" id="components">Components</a></h2>
+<p>To manage tiles and coordinates we are going to make our first component, <code>Coordinates</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// coordinates.rs
+use std::fmt::{self, Display, Formatter};
+use std::ops::{Add, Sub};
+use bevy::prelude::Component;
+
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Default, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct Coordinates {
+    pub x: u16,
+    pub y: u16,
+}
+
+// We want to be able to make coordinates sums..
+impl Add for Coordinates {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -&gt; Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+// ..and subtractions
+impl Sub for Coordinates {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -&gt; Self::Output {
+        Self {
+            x: self.x.saturating_sub(rhs.x),
+            y: self.y.saturating_sub(rhs.y),
+        }
+    }
+}
+
+impl Display for Coordinates {
+    fn fmt(&amp;self, f: &amp;mut Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        write!(f, &quot;({}, {})&quot;, self.x, self.y)
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>Coordinate</code> struct contains unsigned numeric values representing both axis of the board.
+We add the<code>Display</code> implementation as a good practice, and the <code>Add</code> and <code>Sub</code> implementation to allow numeric operations.</p>
+<p>Notice the use of <code>saturating_sub</code> to avoid <strong>panic</strong> if the subtraction result is negative.</p>
+<p>We add the <code>Inspectable</code> derive through our <code>debug</code> feature gate. This trait will make our component display correctly in the inspector GUI.</p>
+<blockquote>
+<p>Why do a component here ?</p>
+</blockquote>
+<p>We won't use <code>Coordinates</code> as component yet, but we will in future steps. This illustrates one of bevy aspects: <em>anything can be a component</em> if you derive <code>Component</code>.
+We also added a bunch of derive attributes which will be useful in the future.</p>
+<h2><a class="header" href="#resources-1" id="resources-1">Resources</a></h2>
+<h3><a class="header" href="#tile" id="tile">Tile</a></h3>
+<p>Let's declare our tiles:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tile.rs
+#[cfg(feature = &quot;debug&quot;)]
+use colored::Colorize;
+
+/// Enum describing a Minesweeper tile
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Tile {
+    /// Is a bomb
+    Bomb,
+    /// Is a bomb neighbor
+    BombNeighbor(u8),
+    /// Empty tile
+    Empty,
+}
+
+impl Tile {
+    /// Is the tile a bomb?
+    pub const fn is_bomb(&amp;self) -&gt; bool {
+        matches!(self, Self::Bomb)
+    }
+
+    #[cfg(feature = &quot;debug&quot;)]
+    pub fn console_output(&amp;self) -&gt; String {
+        format!(
+            &quot;{}&quot;,
+            match self {
+                Tile::Bomb =&gt; &quot;*&quot;.bright_red(),
+                Tile::BombNeighbor(v) =&gt; match v {
+                    1 =&gt; &quot;1&quot;.cyan(),
+                    2 =&gt; &quot;2&quot;.green(),
+                    3 =&gt; &quot;3&quot;.yellow(),
+                    _ =&gt; v.to_string().red(),
+                },
+                Tile::Empty =&gt; &quot; &quot;.normal(),
+            }
+        )
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>We use an <em>enum</em> to avoid a complex struct, and add the <code>console_output</code> method which makes use of our optional <code>colorize</code> crate.</p>
+<blockquote>
+<p>Why this is not a component?</p>
+</blockquote>
+<p>We could use <code>Tile</code> as a component but as we will see in future steps we want maximum flexibility, which means:</p>
+<ul>
+<li><strong>bomb</strong> tiles will have a specific component</li>
+<li><strong>bomb neighbor</strong> tiles will also have a specific component</li>
+</ul>
+<p><strong>Queries</strong> (<code>Query&lt;&gt;</code>) can only filter through component presence or absence (we call this <em>query artifacts</em>), so using directly our <code>Tile</code> struct would
+not allow our systems to use <strong>queries</strong> targeting directly <strong>bombs</strong> for example, as all tiles would be queried.</p>
+<h3><a class="header" href="#tile-map" id="tile-map">Tile Map</a></h3>
+<p>Let's make our tile map generator:</p>
+<h4><a class="header" href="#empty-map" id="empty-map">Empty map</a></h4>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tile_map.rs
+use crate::resources::tile::Tile;
+use std::ops::{Deref, DerefMut};
+
+/// Base tile map
+#[derive(Debug, Clone)]
+pub struct TileMap {
+    bomb_count: u16,
+    height: u16,
+    width: u16,
+    map: Vec&lt;Vec&lt;Tile&gt;&gt;,
+}
+
+impl TileMap {
+    /// Generates an empty map
+    pub fn empty(width: u16, height: u16) -&gt; Self {
+        let map = (0..height)
+            .into_iter()
+            .map(|_| (0..width).into_iter().map(|_| Tile::Empty).collect())
+            .collect();
+        Self {
+            bomb_count: 0,
+            height,
+            width,
+            map,
+        }
+    }
+
+    #[cfg(feature = &quot;debug&quot;)]
+    pub fn console_output(&amp;self) -&gt; String {
+        let mut buffer = format!(
+            &quot;Map ({}, {}) with {} bombs:\n&quot;,
+            self.width, self.height, self.bomb_count
+        );
+        let line: String = (0..=(self.width + 1)).into_iter().map(|_| '-').collect();
+        buffer = format!(&quot;{}{}\n&quot;, buffer, line);
+        for line in self.iter().rev() {
+            buffer = format!(&quot;{}|&quot;, buffer);
+            for tile in line.iter() {
+                buffer = format!(&quot;{}{}&quot;, buffer, tile.console_output());
+            }
+            buffer = format!(&quot;{}|\n&quot;, buffer);
+        }
+        format!(&quot;{}{}&quot;, buffer, line)
+    }
+
+    // Getter for `width`
+    pub fn width(&amp;self) -&gt; u16 {
+        self.width
+    }
+
+    // Getter for `height`
+    pub fn height(&amp;self) -&gt; u16 {
+        self.height
+    }
+
+    // Getter for `bomb_count`
+    pub fn bomb_count(&amp;self) -&gt; u16 {
+        self.bomb_count
+    }
+}
+
+impl Deref for TileMap {
+    type Target = Vec&lt;Vec&lt;Tile&gt;&gt;;
+
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.map
+    }
+}
+
+impl DerefMut for TileMap {
+    fn deref_mut(&amp;mut self) -&gt; &amp;mut Self::Target {
+        &amp;mut self.map
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Our tile map has every generation options we need:</p>
+<ul>
+<li><code>width</code> and <code>height</code> setting the dimensions and the number of tiles</li>
+<li><code>bomb_count</code> setting the amount mines</li>
+<li><code>map</code> a double 2D array of <code>Tile</code></li>
+</ul>
+<blockquote>
+<p>Why use Vec&lt;&gt; and not slices?</p>
+</blockquote>
+<p>I tried to do something like <code>[[Tile; WIDTH]; HEIGHT]</code> making use of rust 1.52 feature of generic <em>consts</em>, but I found it to get really messy.
+If you find a clean way to do it I'd gladly accept a pull request !</p>
+<p>Now we have:</p>
+<ul>
+<li>an <code>empty</code> method building a tile map of <code>Tile::Empty</code></li>
+<li>a <code>console_output</code> method to print the tile map in the console</li>
+<li>a <code>Deref</code> and <code>DerefMut</code> implementation towards our 2D vector</li>
+</ul>
+<h4><a class="header" href="#bombs-and-neighbors" id="bombs-and-neighbors">Bombs and neighbors</a></h4>
+<p>Let's declare an array of 2D delta coordinates:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tile_map.rs
+/// Delta coordinates for all 8 square neighbors
+const SQUARE_COORDINATES: [(i8, i8); 8] = [
+    // Bottom left
+    (-1, -1),
+    // Bottom
+    (0, -1),
+    // Bottom right
+    (1, -1),
+    // Left
+    (-1, 0),
+    // Right
+    (1, 0),
+    // Top Left
+    (-1, 1),
+    // Top
+    (0, 1),
+    // Top right
+    (1, 1),
+];
+<span class="boring">}
+</span></code></pre></pre>
+<p>These tuples define the delta coordinates of the 8 tiles in a square around any tile:</p>
+<pre><code>*--------*-------*-------*
+| -1, 1  | 0, 1  | 1, 1  |
+|--------|-------|-------|
+| -1, 0  | tile  | 1, 0  |
+|--------|-------|-------|
+| -1, -1 | 0, -1 | 1, -1 |
+*--------*-------*-------*
+</code></pre>
+<p>We can make use of it by adding a method to retrieve neighbor tiles:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tile_map.rs
+use crate::components::Coordinates;
+
+ pub fn safe_square_at(&amp;self, coordinates: Coordinates) -&gt; impl Iterator&lt;Item = Coordinates&gt; {
+        SQUARE_COORDINATES
+            .iter()
+            .copied()
+            .map(move |tuple| coordinates + tuple)
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>To allow the <code>Coordinates</code> + <code>(i8, i8)</code> we need to add the following in <code>coordinates.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// coordinates.rs
+impl Add&lt;(i8, i8)&gt; for Coordinates {
+    type Output = Self;
+
+    fn add(self, (x, y): (i8, i8)) -&gt; Self::Output {
+        let x = ((self.x as i16) + x as i16) as u16;
+        let y = ((self.y as i16) + y as i16) as u16;
+        Self { x, y }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Now that we can retrieve surrounding tiles we will use it to count bombs around coordinates, to fill our bomb neighbor tiles:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tile_map.rs
+
+pub fn is_bomb_at(&amp;self, coordinates: Coordinates) -&gt; bool {
+    if coordinates.x &gt;= self.width || coordinates.y &gt;= self.height {
+        return false;
+    };
+    self.map[coordinates.y as usize][coordinates.x as usize].is_bomb()
+}
+
+pub fn bomb_count_at(&amp;self, coordinates: Coordinates) -&gt; u8 {
+    if self.is_bomb_at(coordinates) {
+        return 0;
+    }
+    let res = self
+         .safe_square_at(coordinates)
+         .filter(|coord| self.is_bomb_at(*coord))
+         .count();
+    res as u8
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's place our bombs and neighbors !</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tile_map.rs
+use rand::{thread_rng, Rng};
+
+/// Places bombs and bomb neighbor tiles
+pub fn set_bombs(&amp;mut self, bomb_count: u16) {
+    self.bomb_count = bomb_count;
+    let mut remaining_bombs = bomb_count;
+    let mut rng = thread_rng();
+    // Place bombs
+    while remaining_bombs &gt; 0 {
+        let (x, y) = (
+            rng.gen_range(0..self.width) as usize,
+            rng.gen_range(0..self.height) as usize,
+        );
+        if let Tile::Empty = self[y][x] {
+            self[y][x] = Tile::Bomb;
+            remaining_bombs -= 1;
+        }
+    }
+    // Place bomb neighbors
+    for y in 0..self.height {
+        for x in 0..self.width {
+            let coords = Coordinates { x, y };
+            if self.is_bomb_at(coords) {
+                continue;
+            }
+            let num = self.bomb_count_at(coords);
+            if num == 0 {
+                continue;
+            }
+            let tile = &amp;mut self[y as usize][x as usize];
+            *tile = Tile::BombNeighbor(num);
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Great, let's connect everything in the modules:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/resources/mod.rs
+
+pub(crate) mod tile;
+pub(crate) mod tile_map;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/components/mod.rs
+pub use coordinates::Coordinates;
+
+mod coordinates;
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#plugin" id="plugin">Plugin</a></h2>
+<p>We have our tile map let's test it in our plugin:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+pub mod components;
+pub mod resources;
+
+use bevy::log;
+use bevy::prelude::*;
+use resources::tile_map::TileMap;
+
+pub struct BoardPlugin;
+
+impl Plugin for BoardPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        app.add_startup_system(Self::create_board);
+        log::info!(&quot;Loaded Board Plugin&quot;);
+    }
+}
+
+impl BoardPlugin {
+    /// System to generate the complete board
+    pub fn create_board() {
+        let mut tile_map = TileMap::empty(20, 20);
+        tile_map.set_bombs(40);
+        #[cfg(feature = &quot;debug&quot;)]
+        log::info!(&quot;{}&quot;, tile_map.console_output());
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>What's happening here should look familiar, as we implement <code>Plugin</code> for our <code>BoardPlugin</code> we get access to our <code>App</code>.
+We then register a simple startup <strong>system</strong> to generate our new tile map and print it.</p>
+<p>We need to register our plugin to our <code>main.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// main.rs
+use board_plugin::BoardPlugin;
+
+// ..
+.add_plugin(BoardPlugin)
+<span class="boring">}
+</span></code></pre></pre>
+<p>and let's run the app: <code>cargo run --features debug</code></p>
+<p>We now have our tile map printed in the console:</p>
+<pre><code>2022-02-21T09:24:05.748340Z  INFO board_plugin: Loaded Board Plugin
+2022-02-21T09:24:05.917041Z  INFO board_plugin: Map (20, 20) with 40 bombs:
+----------------------
+|      111  1*1      |
+|      1*211111 111  |
+|111   223*1    1*1  |
+|1*1   1*211   1221  |
+|111   111     1*1   |
+|121211    111 111   |
+|*2*2*1    1*211     |
+|121211  11212*21    |
+|111     1*1 13*31   |
+|1*1     111  2**21  |
+|222         1234*2  |
+|2*2         1*23*211|
+|2*2         123*222*|
+|111     1221 1*211*2|
+|   111  1**1 111 111|
+|   1*1  1221   1221 |
+| 11322111   1111**1 |
+| 1*3*11*1  12*11221 |
+|123*21222  1*21 111 |
+|1*211 1*1  111  1*1 |
+----------------------
+</code></pre>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#the-board" id="the-board">The Board</a></h1>
+<p>We have our tile map but still nothing on screen, let's create some tiles !</p>
+<h2><a class="header" href="#board-options" id="board-options">Board options</a></h2>
+<p>To comply with our objective of making a completely modular plugin we must first provide generation options.
+We will now create a nice configuration resource like bevy's <code>WindowDescriptor</code> we saw in <a href="./1_setup.html">Part 1</a>.</p>
+<p>Create a <code>board_options</code> module in our plugin</p>
+<pre><code>├── Cargo.toml
+└── src
+    ├── components
+    │   ├── coordinates.rs
+    │   └── mod.rs
+    ├── lib.rs
+    └── resources
+        ├── board_options.rs
+        ├── mod.rs
+        ├── tile.rs
+        └── tile_map.rs
+</code></pre>
+<p>and add it to the <code>mod.rs</code> file:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ..
+pub use board_options::*;
+
+mod board_options;
+<span class="boring">}
+</span></code></pre></pre>
+<p>We want the following options:</p>
+<ul>
+<li>All tile map options (width, height and bomb count)</li>
+<li>Custom Padding between tile sprites</li>
+<li>Custom tile size or window adaptive size</li>
+<li>Custom board world position or window centered with optional offset</li>
+<li>Optional safe uncovered start zone</li>
+</ul>
+<blockquote>
+<p>That's a lot !</p>
+</blockquote>
+<p>It is, but the more, the merrier ! Let's do this:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_options.rs
+use bevy::prelude::Vec3;
+use serde::{Deserialize, Serialize};
+
+/// Tile size options
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum TileSize {
+    /// Fixed tile size
+    Fixed(f32),
+    /// Window adaptative tile size
+    Adaptive { min: f32, max: f32 },
+}
+
+/// Board position customization options
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum BoardPosition {
+    /// Centered board
+    Centered { offset: Vec3 },
+    /// Custom position
+    Custom(Vec3),
+}
+
+/// Board generation options. Must be used as a resource
+// We use serde to allow saving option presets and loading them at runtime
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BoardOptions {
+    /// Tile map size
+    pub map_size: (u16, u16),
+    /// bomb count
+    pub bomb_count: u16,
+    /// Board world position
+    pub position: BoardPosition,
+    /// Tile world size
+    pub tile_size: TileSize,
+    /// Padding between tiles
+    pub tile_padding: f32,
+    /// Does the board generate a safe place to start
+    pub safe_start: bool,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>This seems complex but if we implement good <code>Default</code> implementations our the options will be very easy to use</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_options.rs
+
+impl Default for TileSize {
+    fn default() -&gt; Self {
+        Self::Adaptive {
+            min: 10.0,
+            max: 50.0,
+        }
+    }
+}
+
+impl Default for BoardPosition {
+    fn default() -&gt; Self {
+        Self::Centered {
+            offset: Default::default(),
+        }
+    }
+}
+
+impl Default for BoardOptions {
+    fn default() -&gt; Self {
+        Self {
+            map_size: (15, 15),
+            bomb_count: 30,
+            position: Default::default(),
+            tile_size: Default::default(),
+            tile_padding: 0.,
+            safe_start: false,
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>let's register our new resource to our app:</p>
+<pre><code class="language-diff">// main.rs
++ use board_plugin::resources::BoardOptions;
+
+fn main() {
+    let mut app = App::new();
+    // Window setup
+    app.insert_resource(WindowDescriptor {
+        title: &quot;Mine Sweeper!&quot;.to_string(),
+        width: 700.,
+        height: 800.,
+        ..Default::default()
+    })
+    // Bevy default plugins
+    .add_plugins(DefaultPlugins);
+    #[cfg(feature = &quot;debug&quot;)]
+    // Debug hierarchy inspector
+    app.add_plugin(WorldInspectorPlugin::new());
++     // Board plugin options
++     app.insert_resource(BoardOptions {
++         map_size: (20, 20),
++         bomb_count: 40,
++         tile_padding: 3.0,
++         ..Default::default()
++     })
+    .add_plugin(BoardPlugin)
+    // Startup system (cameras)
+    .add_startup_system(camera_setup);
+    // Run the app
+    app.run();
+}
+</code></pre>
+<h2><a class="header" href="#board-generation" id="board-generation">Board generation</a></h2>
+<p>Now that we have a generation option resource, let's use in our plugin to build our first board.
+Let's edit our <code>create_board</code> startup system:</p>
+<h3><a class="header" href="#params-and-tile-map" id="params-and-tile-map">Params and tile map</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::BoardOptions;
+
+// ..
+pub fn create_board(
+        mut commands: Commands,
+        board_options: Option&lt;Res&lt;BoardOptions&gt;&gt;,
+        window: Res&lt;WindowDescriptor&gt;,
+    ) {}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Notice we added parameters to our system:</p>
+<ul>
+<li><code>Commands</code> as we will spawn entities and components</li>
+<li><code>Option&lt;Res&lt;BoardOption&gt;&gt;</code> is our new generation option resource, but optional !</li>
+<li><code>Res&lt;WindowDescriptor&gt;</code> is the window configuration resource we set up in our <code>main.rs</code></li>
+</ul>
+<p>/!\ <em>At the time of writing this tutorial I realized that since the <code>WindowDescriptor</code> resource is optional our system will panic if no window configuration is set up.
+A better practice would be to use it in an <code>Option&lt;&gt;</code> like our <code>BoardOptions</code> or access the <code>Windows</code> resource directly.</em></p>
+<p>Since our generation options are optional we need to use the <code>Default</code> implementation if it is not set:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ..
+let options = match board_options {
+     None =&gt; BoardOptions::default(), // If no options is set we use the default one
+     Some(o) =&gt; o.clone(),
+};
+<span class="boring">}
+</span></code></pre></pre>
+<p>We can now generate our tile map:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ..
+// Tilemap generation
+let mut tile_map = TileMap::empty(options.map_size.0, options.map_size.1);
+tile_map.set_bombs(options.bomb_count);
+#[cfg(feature = &quot;debug&quot;)]
+// Tilemap debugging
+log::info!(&quot;{}&quot;, tile_map.console_output());
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#tile-size" id="tile-size">Tile size</a></h3>
+<p>We added options for the tile size, and one determining tile size according to the window.
+If the option is selected we must compute the tile size between the window, and the tile map dimensions.</p>
+<p>Add the following method to <code>BoardPlugin</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+/// Computes a tile size that matches the window according to the tile map size
+fn adaptative_tile_size(
+    window: Res&lt;WindowDescriptor&gt;,
+    (min, max): (f32, f32), // Tile size constraints
+    (width, height): (u16, u16), // Tile map dimensions
+) -&gt; f32 {
+    let max_width = window.width / width as f32;
+    let max_heigth = window.height / height as f32;
+    max_width.min(max_heigth).clamp(min, max)
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's use it in our <code>create_board</code> system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::TileSize;
+
+// ..
+// We define the size of our tiles in world space
+let tile_size = match options.tile_size {
+    TileSize::Fixed(v) =&gt; v,
+    TileSize::Adaptive { min, max } =&gt; Self::adaptative_tile_size(
+        window,
+        (min, max),
+        (tile_map.width(), tile_map.height()),
+    ),
+};
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#board-creation" id="board-creation">Board creation</a></h3>
+<p>We can now compute the board <em>world size</em> and <em>world_position</em></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::BoardPosition;
+
+// ..
+// We deduce the size of the complete board
+let board_size = Vec2::new(
+    tile_map.width() as f32 * tile_size,
+    tile_map.height() as f32 * tile_size,
+);
+log::info!(&quot;board size: {}&quot;, board_size);
+// We define the board anchor position (bottom left)
+let board_position = match options.position {
+    BoardPosition::Centered { offset } =&gt; {
+        Vec3::new(-(board_size.x / 2.), -(board_size.y / 2.), 0.) + offset
+    }
+    BoardPosition::Custom(p) =&gt; p,
+};
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p>That's a weird computation</p>
+</blockquote>
+<p>I make the choice here to anchor the board at the bottom left instead of the center in order to place all the tile children
+in positive relative positions.</p>
+<p><img src="docs/4_board_coords.png" alt="Coordinates" /></p>
+<p><em>The actual board object will be on the bottom left of the visible board</em></p>
+<p>We can now create our board:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+commands
+            .spawn()
+            .insert(Name::new(&quot;Board&quot;))
+            .insert(Transform::from_translation(board_position))
+            .insert(GlobalTransform::default());
+<span class="boring">}
+</span></code></pre></pre>
+<p>If we run the app we now have an empty board with three components:</p>
+<ul>
+<li>a <code>Name</code> (which will be used by the inspector GUI)</li>
+<li>a <code>Transform</code>, which describe its local <strong>translation</strong>, <strong>scale</strong> and <strong>rotation</strong></li>
+<li>a <code>GlobalTransform</code> which describes the same values as <code>Transform</code> but globally</li>
+</ul>
+<p>Note that we have to create both <code>Transform</code> and  <code>GlobalTransform</code> but we <strong>never</strong> set the global one.
+If one is missing, the entire hierarchy will not behave as expected.</p>
+<p>Let's create the Board background: Add the following to the <code>spawn</code> code</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+    .with_children(|parent| {
+                // We spawn the board background sprite at the center of the board, since the sprite pivot is centered
+                parent
+                    .spawn_bundle(SpriteBundle {
+                        sprite: Sprite {
+                            color: Color::WHITE,
+                            custom_size: Some(board_size),
+                            ..Default::default()
+                        },
+                        transform: Transform::from_xyz(board_size.x / 2., board_size.y / 2., 0.),
+                        ..Default::default()
+                    })
+                    .insert(Name::new(&quot;Background&quot;));
+            });
+<span class="boring">}
+</span></code></pre></pre>
+<p>So what is happening here:
+First we use <code>with_children</code>, giving us a builder similar to <code>Commands</code> but to spawn children objects to our Board.
+Then we spawn a new &quot;Background&quot; entity with a <code>SpriteBundle</code> (note that all built-in <strong>Component Bundles</strong> already have <code>Transform</code> and <code>GlobalTransform</code> components):</p>
+<ul>
+<li><code>sprite</code>: we create a basic rectangle of the size of our board with a white color.</li>
+<li><code>transform</code>: Sprite anchors are centered, since we put our board to the bottom left, we want to put this background in the center of the board.</li>
+</ul>
+<p><img src="docs/4_board_coords_2.png" alt="Background Coordinates" /></p>
+<p><em>The background is positioned in the center</em></p>
+<p>Let's spawn the tiles !</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use components::Coordinates;
+
+// ..
+    .with_children(|parent| {
+        
+        // ..
+
+        // Tiles
+        for (y, line) in tile_map.iter().enumerate() {
+                    for (x, tile) in line.iter().enumerate() {
+                        parent
+                            .spawn_bundle(SpriteBundle {
+                                sprite: Sprite {
+                                    color: Color::GRAY,
+                                    custom_size: Some(Vec2::splat(
+                                        tile_size - options.tile_padding as f32,
+                                    )),
+                                    ..Default::default()
+                                },
+                                transform: Transform::from_xyz(
+                                    (x as f32 * tile_size) + (tile_size / 2.),
+                                    (y as f32 * tile_size) + (tile_size / 2.),
+                                    1.,
+                                ),
+                                ..Default::default()
+                            })
+                            .insert(Name::new(format!(&quot;Tile ({}, {})&quot;, x, y)))
+                            // We add the `Coordinates` component to our tile entity
+                            .insert(Coordinates {
+                                x: x as u16,
+                                y: y as u16,
+                            });
+                    }
+                }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>We iterate through the tile map and spawn a new entity for each tile using a <code>SpriteBundle</code> again. We also add a <code>Coordinates</code> component for each tile.
+Note that for the <code>z</code> value of the <code>Transform</code> we put <code>1.</code>, so the tile is closer to the camera than the background, and therefore printed on top of the background.</p>
+<p>Let's run our app with the <code>debug</code> feature</p>
+<p><code>cargo run --features debug</code></p>
+<p><img src="docs/4_inspector_gui.png" alt="Inspector GUI" /></p>
+<p>Our board is generated and we can observe the difference between <code>Transform</code> and <code>GlobalTransform</code>.</p>
+<ul>
+<li>Our board entity <code>Transform</code> and <code>GlobalTransform</code> are identical because this entity doesn't have a parent</li>
+<li>Our tiles <code>Transform</code> <em>translation</em> are relative to their parent, the board entity, giving the real <em>translation</em> in the <code>GlobalTransform</code> component.</li>
+</ul>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#tiles-and-components" id="tiles-and-components">Tiles and Components</a></h1>
+<h2><a class="header" href="#assets" id="assets">Assets</a></h2>
+<p>Let's complete our board, for this we will need <em>assets</em>:</p>
+<ul>
+<li>A bomb png texture</li>
+<li>A font</li>
+</ul>
+<p>(You can use the assets from the <a href="https://gitlab.com/qonfucius/incubator/minesweeper/minesweeper-tutorial/-/tree/master/assets">tutorial repository</a>)</p>
+<p>Place your assets in an <code>assets</code> folder at the root of your project</p>
+<pre><code>├── Cargo.lock
+├── Cargo.toml
+├── assets
+│   ├── fonts
+│   │   └── my_font.ttf
+│   └── sprites
+│       ├── bomb.png
+├── board_plugin
+│   ├── Cargo.toml
+│   └── src
+│       ├── components
+│       ├── lib.rs
+│       └── resources
+├── src
+│   └── main.rs
+</code></pre>
+<p>Let's load these assets in our <code>create_board</code> startup system.
+For this we need to add an argument to the system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> pub fn create_board(
+        mut commands: Commands,
+        board_options: Option&lt;Res&lt;BoardOptions&gt;&gt;,
+        window: Res&lt;WindowDescriptor&gt;,
+        asset_server: Res&lt;AssetServer&gt;, // The AssetServer resource
+    ) {
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>AssetServer</code> resource allows loading files from the <code>assets</code> folder.</p>
+<p>We can now load our assets right at the beginning of the function and retrieve handles:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+    let font = asset_server.load(&quot;fonts/pixeled.ttf&quot;);
+    let bomb_image = asset_server.load(&quot;sprites/bomb.png&quot;);
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#component-declaration" id="component-declaration">Component declaration</a></h2>
+<p>Our tile map knows which tile is a bomb, a bomb neighbor or empty, but the ECS doesn't.
+Let's declare components we will attach to our tile entities in our plugin under <code>board_plugin/components</code> with our <code>Coordinates</code> component:</p>
+<ul>
+<li><code>board_plugin/src/components/bomb.rs</code></li>
+<li><code>board_plugin/src/components/bomb_neighbor.rs</code></li>
+<li><code>board_plugin/src/components/uncover.rs</code></li>
+</ul>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/components/mod.rs
+pub use bomb::Bomb;
+pub use bomb_neighbor::BombNeighbor;
+pub use uncover::Uncover;
+
+mod bomb;
+mod bomb_neighbor;
+mod uncover;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#bomb" id="bomb">Bomb</a></h3>
+<p>This component will identify a tile as a <strong>bomb</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// bomb.rs
+use bevy::prelude::Component;
+
+/// Bomb component
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct Bomb;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#bomb-neighbor" id="bomb-neighbor">Bomb neighbor</a></h3>
+<p>This component will identify a tile as <em>bomb neighbor</em></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::Component;
+
+/// Bomb neighbor component
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct BombNeighbor {
+    /// Number of neighbor bombs
+    pub count: u8,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#uncover" id="uncover">Uncover</a></h3>
+<p>This component will identify tiles to uncover, we will use it in <a href="./6_covering&amp;uncovering.html">part 6</a></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::Component;
+
+/// Uncover component, indicates a covered tile that should be uncovered
+#[cfg_attr(feature = &quot;debug&quot;, derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct Uncover;
+<span class="boring">}
+</span></code></pre></pre>
+<hr />
+<p>Let's register the components for the debug inspector in our plugin:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+#[cfg(feature = &quot;debug&quot;)]
+use bevy_inspector_egui::RegisterInspectable;
+use components::*;
+
+impl Plugin for BoardPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        // ..
+        #[cfg(feature = &quot;debug&quot;)]
+        {
+            // registering custom component to be able to edit it in inspector
+            app.register_inspectable::&lt;Coordinates&gt;();
+            app.register_inspectable::&lt;BombNeighbor&gt;();
+            app.register_inspectable::&lt;Bomb&gt;();
+            app.register_inspectable::&lt;Uncover&gt;();
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#component-use" id="component-use">Component use</a></h2>
+<p>Let's create a function for <code>BoardPlugin</code> creating a <code>Text2DBundle</code> for our bomb counters:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Generates the bomb counter text 2D Bundle for a given value
+fn bomb_count_text_bundle(count: u8, font: Handle&lt;Font&gt;, size: f32) -&gt; Text2dBundle {
+    // We retrieve the text and the correct color
+    let (text, color) = (
+        count.to_string(),
+        match count {
+            1 =&gt; Color::WHITE,
+            2 =&gt; Color::GREEN,
+            3 =&gt; Color::YELLOW,
+            4 =&gt; Color::ORANGE,
+            _ =&gt; Color::PURPLE,
+        },
+    );
+    // We generate a text bundle
+    Text2dBundle {
+        text: Text {
+            sections: vec![TextSection {
+                value: text,
+                style: TextStyle {
+                    color,
+                    font,
+                    font_size: size,
+                },
+            }],
+            alignment: TextAlignment {
+                vertical: VerticalAlign::Center,
+                horizontal: HorizontalAlign::Center,
+            },
+        },
+        transform: Transform::from_xyz(0., 0., 1.),
+        ..Default::default()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>It takes in parameter:</p>
+<ul>
+<li><code>count</code>: the neighboring bomb count to print</li>
+<li><code>font</code>: a asset <code>Handle</code> of our font</li>
+<li><code>size</code>: a text size</li>
+</ul>
+<p>The colors are completely arbitrary.
+Again, we put the <code>z</code> value of the <code>Transform</code> translation to <code>1.</code> so the text is printed on top of the tile.</p>
+<p>We can now move our tile spawning loop into a distinct function:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+fn spawn_tiles(
+        parent: &amp;mut ChildBuilder,
+        tile_map: &amp;TileMap,
+        size: f32,
+        padding: f32,
+        color: Color,
+        bomb_image: Handle&lt;Image&gt;,
+        font: Handle&lt;Font&gt;,
+    ) {
+        // Tiles
+        for (y, line) in tile_map.iter().enumerate() {
+            for (x, tile) in line.iter().enumerate() {
+                let coordinates = Coordinates {
+                  x: x as u16,
+                  y: y as u16,
+                };
+                let mut cmd = parent.spawn();
+                cmd.insert_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color,
+                        custom_size: Some(Vec2::splat(size - padding)),
+                        ..Default::default()
+                    },
+                    transform: Transform::from_xyz(
+                        (x as f32 * size) + (size / 2.),
+                        (y as f32 * size) + (size / 2.),
+                        1.,
+                    ),
+                    ..Default::default()
+                })
+                .insert(Name::new(format!(&quot;Tile ({}, {})&quot;, x, y)))
+                .insert(coordinates);
+            }
+        }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<ul>
+<li>Notice we now use a temporary <code>cmd</code> value for our entity builder*</li>
+</ul>
+<p>We can now call it from our <code>create_board</code> startup system, in our <code>with_children</code> block after the background spawn:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+    Self::spawn_tiles(
+        parent,
+        &amp;tile_map,
+        tile_size,
+        options.tile_padding,
+        Color::GRAY,
+        bomb_image,
+        font,
+    );
+<span class="boring">}
+</span></code></pre></pre>
+<p>Then we complete our <code>spawn_tiles</code> function to add our bombs sprites and counter texts inside the double <code>for</code> loop:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::tile::Tile;
+
+// ..
+    match tile {
+                    // If the tile is a bomb we add the matching component and a sprite child
+                    Tile::Bomb =&gt; {
+                        cmd.insert(Bomb);
+                        cmd.with_children(|parent| {
+                            parent.spawn_bundle(SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(Vec2::splat(size - padding)),
+                                    ..Default::default()
+                                },
+                                transform: Transform::from_xyz(0., 0., 1.),
+                                texture: bomb_image.clone(),
+                                ..Default::default()
+                            });
+                        });
+                    }
+                    // If the tile is a bomb neighbour we add the matching component and a text child
+                    Tile::BombNeighbor(v) =&gt; {
+                        cmd.insert(BombNeighbor { count: *v });
+                        cmd.with_children(|parent| {
+                            parent.spawn_bundle(Self::bomb_count_text_bundle(
+                                *v,
+                                font.clone(),
+                                size - padding,
+                            ));
+                        });
+                    }
+                    Tile::Empty =&gt; (),
+                }
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Until now all tiles had identical components like <code>Coordinates</code>, <code>Transform</code>, <code>Sprite</code>, etc.
+But now some tiles have:</p>
+<ul>
+<li>A <code>Bomb</code> component and a child entity with the bomb sprite</li>
+<li>A <code>BombNeighbor</code> component and a child entity with the counter text</li>
+</ul>
+<blockquote>
+<p>We added a texture to the bomb sprite, what about the others?</p>
+</blockquote>
+<p>By default, a white square texture is used if no <code>texture</code> is specified on <code>SpriteBundle</code>. In Part 9 we will see it in more detail.</p>
+<p>Let's run our app and get our beautiful board:</p>
+<p><img src="docs/5_board.png" alt="Board" /></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#input-management" id="input-management">Input Management</a></h1>
+<p>We have a glorious board, but we can't interact with it, let's handle some input !</p>
+<h2><a class="header" href="#bounds" id="bounds">Bounds</a></h2>
+<p>To detect mouse input inside our board we will use common gamedev type called <code>Bounds</code>. It is strangely missing from bevy so we'll code a simple version for our plugin in <code>board_plugin/src/bounds.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// bounds.rs
+use bevy::prelude::Vec2;
+
+#[derive(Debug, Copy, Clone)]
+pub struct Bounds2 {
+    pub position: Vec2,
+    pub size: Vec2,
+}
+
+impl Bounds2 {
+    pub fn in_bounds(&amp;self, coords: Vec2) -&gt; bool {
+        coords.x &gt;= self.position.x
+            &amp;&amp; coords.y &gt;= self.position.y
+            &amp;&amp; coords.x &lt;= self.position.x + self.size.x
+            &amp;&amp; coords.y &lt;= self.position.y + self.size.y
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Ths structure defines a 2D rectangle and can check if coordinates are contained in its extents.</p>
+<p>Connect the file to <code>board_plugin/src/lib.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+mod bounds;
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#the-board-resource" id="the-board-resource">The Board resource</a></h2>
+<p>The tile map we generate in our <code>create_board</code> startup system is lost after that system, we need to put it in a <em>resource</em> for it to last.
+We also need to store our board <code>Bounds</code> for input detection.</p>
+<p>Let's create a <code>board.rs</code> in our <code>resources</code> folder:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// mod.rs
+// ..
+pub use board_options::*;
+
+mod board;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+use crate::bounds::Bounds2;
+use crate::{Coordinates, TileMap};
+use bevy::prelude::*;
+
+#[derive(Debug)]
+pub struct Board {
+    pub tile_map: TileMap,
+    pub bounds: Bounds2,
+    pub tile_size: f32,
+}
+
+impl Board {
+    /// Translates a mouse position to board coordinates
+    pub fn mouse_position(&amp;self, window: &amp;Window, position: Vec2) -&gt; Option&lt;Coordinates&gt; {
+        // Window to world space
+        let window_size = Vec2::new(window.width(), window.height());
+        let position = position - window_size / 2.;
+
+        // Bounds check
+        if !self.bounds.in_bounds(position) {
+            return None;
+        }
+        // World space to board space
+        let coordinates = position - self.bounds.position;
+        Some(Coordinates {
+            x: (coordinates.x / self.tile_size) as u16,
+            y: (coordinates.y / self.tile_size) as u16,
+        })
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Our <code>Board</code> resource stores a <code>TileMap</code>, the board <code>Bounds</code> and a <code>tile_size</code> which is the size of individual square tiles.</p>
+<p>We provide a method converting mouse position to our own coordinate system. This computation seems strange because unlike our entities <strong>world space</strong> where the origin
+is at the center of the screen (based on camera position), the <strong>window space</strong> origin is on the bottom left.</p>
+<p>So we have to transform the mouse position so that it matches our <strong>world space</strong>, check the bounds and then convert the coordinates into a tile coordinate.</p>
+<p>Now we defined our resource, we need to register it at the end of our <code>create_board</code> startup system</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bounds::Bounds2;
+use resources::Board;
+use bevy::math::Vec3Swizzles;
+
+// ..
+
+// We add the main resource of the game, the board
+        commands.insert_resource(Board {
+            tile_map,
+            bounds: Bounds2 {
+                position: board_position.xy(),
+                size: board_size,
+            },
+            tile_size,
+        });
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>Board</code> is now available for any <em>system</em>.</p>
+<h2><a class="header" href="#input-system" id="input-system">Input system</a></h2>
+<p>We can now create or first regular <em>system</em> which will check every frame for a mouse click event.</p>
+<p>Let's create a <code>systems</code> module in our board plugin with an <code>input.rs</code> file.</p>
+<blockquote>
+<p>Small hierarchy recap:</p>
+<pre><code>├── Cargo.lock
+├── Cargo.toml
+├── assets
+├── board_plugin
+│    ├── Cargo.toml
+│    └── src
+│         ├── bounds.rs
+│         ├── components
+│         │    ├── bomb.rs
+│         │    ├── bomb_neighbor.rs
+│         │    ├── coordinates.rs
+│         │    ├── mod.rs
+│         │    ├── uncover.rs
+│         ├── lib.rs
+│         ├── resources
+│         │    ├── board.rs
+│         │    ├── board_options.rs
+│         │    ├── mod.rs
+│         │    ├── tile.rs
+│         │    └── tile_map.rs
+│         └── systems
+│              ├── input.rs
+│              └── mod.rs
+├── src
+│    └── main.rs
+</code></pre>
+</blockquote>
+<p>Don't forget to connect the <code>systems</code> module in <code>lib.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod systems;
+<span class="boring">}
+</span></code></pre></pre>
+<p>and the <code>input</code> module in <code>systems/mod.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub mod input;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's define our input system !</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// input.rs
+use crate::Board;
+use bevy::input::{mouse::MouseButtonInput, ElementState};
+use bevy::log;
+use bevy::prelude::*;
+
+pub fn input_handling(
+    windows: Res&lt;Windows&gt;,
+    board: Res&lt;Board&gt;,
+    mut button_evr: EventReader&lt;MouseButtonInput&gt;,
+) {
+    let window = windows.get_primary().unwrap();
+
+    for event in button_evr.iter() {
+        if let ElementState::Pressed = event.state {
+            let position = window.cursor_position();
+            if let Some(pos) = position {
+                log::trace!(&quot;Mouse button pressed: {:?} at {}&quot;, event.button, pos);
+                let tile_coordinates = board.mouse_position(window, pos);
+                if let Some(coordinates) = tile_coordinates {
+                    match event.button {
+                        MouseButton::Left =&gt; {
+                            log::info!(&quot;Trying to uncover tile on {}&quot;, coordinates);
+                            // TODO: generate an event
+                        }
+                        MouseButton::Right =&gt; {
+                            log::info!(&quot;Trying to mark tile on {}&quot;, coordinates);
+                            // TODO: generate an event
+                        }
+                        _ =&gt; (),
+                    }
+                }
+            }
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>This function is our input <em>system</em>, it takes three arguments:</p>
+<ul>
+<li>a <code>Windows</code> resource</li>
+<li>our own <code>Board</code> resource</li>
+<li>a <code>MouseButtonInput</code> event reader</li>
+</ul>
+<p>We iterate throught the event reader to retrieve every event, keeping only <code>Pressed</code> events.
+We retrieve the mouse position and use our <code>Board</code> to convert the mouse position into tile coordinates
+and then we log the action (uncover or mark) according to the mouse button.</p>
+<blockquote>
+<p>So if we press an other button we will still perform the conversion?</p>
+</blockquote>
+<p>Yes, we could check the buttons first to optimize a bit but it would make the code less clear for a tutorial.</p>
+<p>We can now register our system in our <code>BoardPlugin::build()</code> method:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+//    app.add_startup_system(Self::create_board)
+        .add_system(systems::input::input_handling);
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Running the app you can now use your left and right click buttons on the window and notice that:</p>
+<ul>
+<li>If you click on the board it logs the coordinates and the action</li>
+<li>If you click outside the board or with another button, nothing happens</li>
+</ul>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#uncovering-tiles" id="uncovering-tiles">Uncovering Tiles</a></h1>
+<p>To cover our tiles we will simply add a child entity for each tile with a sprite, hiding what's below.
+We will use the <code>Uncover</code> component set up in <a href="./4_tiles&amp;components.html">part 4</a> for uncovering.</p>
+<h2><a class="header" href="#board-resource" id="board-resource">Board resource</a></h2>
+<p>To uncover the tiles we will need to store references to each covering entity, let's edit our <code>Board</code> resource:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+use bevy::utils::HashMap;
+
+#[derive(Debug)]
+pub struct Board {
+    // ..
+    pub covered_tiles: HashMap&lt;Coordinates, Entity&gt;,
+}
+
+impl Board {
+    // ..
+
+    /// Retrieves a covered tile entity
+    pub fn tile_to_uncover(&amp;self, coords: &amp;Coordinates) -&gt; Option&lt;&amp;Entity&gt; {
+      self.covered_tiles.get(coords)
+    }
+
+    /// We try to uncover a tile, returning the entity
+    pub fn try_uncover_tile(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;Entity&gt; {
+        self.covered_tiles.remove(coords)
+    }
+
+    /// We retrieve the adjacent covered tile entities of `coord`
+    pub fn adjacent_covered_tiles(&amp;self, coord: Coordinates) -&gt; Vec&lt;Entity&gt; {
+        self.tile_map
+            .safe_square_at(coord)
+            .filter_map(|c| self.covered_tiles.get(&amp;c))
+            .copied()
+            .collect()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Instead of making some complex new tile map we will use a <code>HashMap</code> containing the entities. <code>Entity</code> being a simple identifier implements <code>Copy</code> and <code>Clone</code>, so can be duplicated and stored safely.
+Every time we uncover a tile we will remove the entity from our map.</p>
+<p>We provide three methods:</p>
+<ul>
+<li><code>tile_to_uncover</code> to retrieve a covered tile entity at some tile coordinates</li>
+<li><code>try_uncover_tile</code> which removes the entity from the map if a covered tile entity exists at the given coordinates</li>
+<li><code>adjacent_covered_tiles</code> which allows to retrieve all covered tile in a square around some coordinates.</li>
+</ul>
+<h2><a class="header" href="#tile-cover" id="tile-cover">Tile cover</a></h2>
+<p>We edit our <code>spawn_tiles</code> function to add the following arguments:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bevy::utils::HashMap;
+
+// ..
+    fn spawn_tiles(
+        // ..
+        covered_tile_color: Color,
+        covered_tiles: &amp;mut HashMap&lt;Coordinates, Entity&gt;,
+    )
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>and we can add the tile cover creation for every tile:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+
+// ..
+    // .insert(coordinates);
+    // We add the cover sprites
+    cmd.with_children(|parent| {
+                    let entity = parent
+                        .spawn_bundle(SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::splat(size - padding)),
+                                color: covered_tile_color,
+                                ..Default::default()
+                            },
+                            transform: Transform::from_xyz(0., 0., 2.),
+                            ..Default::default()
+                        })
+                        .insert(Name::new(&quot;Tile Cover&quot;))
+                        .id();
+                    covered_tiles.insert(coordinates, entity);
+                });
+    // match tile {
+//.. 
+<span class="boring">}
+</span></code></pre></pre>
+<hr />
+<p>Let's edit our <code>setup_board</code> system accordingly:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bevy::utils::{AHashExt, HashMap};
+
+// ..
+let mut covered_tiles =
+            HashMap::with_capacity((tile_map.width() * tile_map.height()).into());
+// ..
+Self::spawn_tiles(
+    //..
+    Color::DARK_GRAY,
+    &amp;mut covered_tiles
+);
+// ..
+commands.insert_resource(Board {
+    //..
+    covered_tiles,
+})
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Now, each <em>board tile</em> will have a child &quot;Tile Cover&quot; entity with a sprite hiding it.</p>
+<p><img src="docs/7_inspector_gui.png" alt="Inspector GUI" /></p>
+<h2><a class="header" href="#events" id="events">Events</a></h2>
+<p>As shown in the <a href="./5_input&amp;resource.html">previous part</a> we want to send an event when a tile is clicked.
+an <strong>event</strong> is like a <strong>resource</strong> but available for 1 frame. (<a href="https://bevy-cheatbook.github.io/programming/events.html">see more about events</a>)</p>
+<p>Let's create an <code>events.rs</code> module for our <code>board_plugin</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/events.rs
+use crate::components::Coordinates;
+
+#[derive(Debug, Copy, Clone)]
+pub struct TileTriggerEvent(pub Coordinates);
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/lib.rs
+mod events;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Just like <strong>components</strong> and <strong>resources</strong>, <strong>events</strong> can be any rust type.
+Here we choose to have an event containing the board coordinates of the tile to uncover.</p>
+<h2><a class="header" href="#systems" id="systems">Systems</a></h2>
+<h3><a class="header" href="#input" id="input">Input</a></h3>
+<p>Let's edit our <code>input_handling</code> system and send our new event for a <em>left click</em>:</p>
+<pre><code class="language-diff">// input.rs
++ use crate::events::TileTriggerEvent;
+
+pub fn input_handling(
+    // ..
++   mut tile_trigger_ewr: EventWriter&lt;TileTriggerEvent&gt;,
+) {
+    // ..
+    // log::info!(&quot;Trying to uncover tile on {}&quot;, coordinates);
+-   // TODO: generate an event
++   tile_trigger_ewr.send(TileTriggerEvent(coordinates));
+    // ..
+}
+</code></pre>
+<p>We add a new argument, an <code>EventWriter</code> for our new event, and replace our <em>TODO</em> with the sending code.
+Now every time we use our left mouse button on the board, a <code>TileTriggerEvent</code> is sent.</p>
+<h3><a class="header" href="#uncover-1" id="uncover-1">Uncover</a></h3>
+<h4><a class="header" href="#trigger-event-handler" id="trigger-event-handler">Trigger event handler</a></h4>
+<p>We can now create a system listening to our new event. Let's create an <code>uncover.rs</code> file in our <code>systems</code> module:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// systems/mod.rs
+pub mod uncover;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// systems/uncover.rs
+use bevy::prelude::*;
+use crate::{Board, Bomb, BombNeighbor, Coordinates, Uncover};
+use crate::events::TileTriggerEvent;
+
+pub fn trigger_event_handler(
+    mut commands: Commands,
+    board: Res&lt;Board&gt;,
+    mut tile_trigger_evr: EventReader&lt;TileTriggerEvent&gt;,
+) {
+    for trigger_event in tile_trigger_evr.iter() {
+        if let Some(entity) = board.tile_to_uncover(&amp;trigger_event.0) {
+            commands.entity(*entity).insert(Uncover);
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Like our input system we iterate through <code>TileTriggerEvent</code> events.
+For each of these events we check if the tile is covered, and if it is we add an <code>Uncover</code> component to it.</p>
+<h4><a class="header" href="#uncover-tiles" id="uncover-tiles">Uncover tiles</a></h4>
+<p>Now let's make an other system using this <code>Uncover</code> component:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+
+pub fn uncover_tiles(
+    mut commands: Commands,
+    mut board: ResMut&lt;Board&gt;,
+    children: Query&lt;(Entity, &amp;Parent), With&lt;Uncover&gt;&gt;,
+    parents: Query&lt;(&amp;Coordinates, Option&lt;&amp;Bomb&gt;, Option&lt;&amp;BombNeighbor&gt;)&gt;,
+) {
+    
+}
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p>Our first <strong>query</strong> !</p>
+</blockquote>
+<p>The arguments:</p>
+<ul>
+<li><code>commands</code>, as usual for entity manipulation</li>
+<li><code>board</code> our <code>Board</code> resource but with mutable access (<code>ResMut</code>)</li>
+<li><code>Query&lt;(Entity, &amp;Parent), With&lt;Uncover&gt;&gt;</code> : We query both <code>Entity</code> and <code>Parent</code> for every entity having an <code>Uncover</code> component.</li>
+<li><code>Query&lt;(&amp;Coordinates, Option&lt;&amp;Bomb&gt;, Option&lt;&amp;BombNeighbor&gt;)&gt;</code>: We query every <code>Coordinate</code> component and maybe <code>Bomb</code> and <code>BombNeighbor</code> components.</li>
+</ul>
+<p>There are two ways to get data from queries, to <em>iterate</em> through it or to <em>get</em> the queried components from a specified entity. (<a href="https://bevy-cheatbook.github.io/programming/queries.html">see more about queries</a>)</p>
+<p>Let's iterate through the <code>children</code> query:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+// ..
+    // We iterate through tile covers to uncover
+    for (entity, parent) in children.iter() {
+        // we destroy the tile cover entity
+        commands
+            .entity(entity)
+            .despawn_recursive();
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>We get every <code>Entity</code> of tile covers and the <code>Parent</code> (parent entity) from the query.
+We retrieve the tile cover entity commands from <code>Commands</code> and we destroy the entity</p>
+<blockquote>
+<p>Why <code>despawn_recursive</code>?</p>
+</blockquote>
+<p>This method will also despawn potential child entities and will <em>unlink</em> the tile cover from the board tile entity.</p>
+<p>Okay, we destroy the triggered tile cover, but we need to check wich <em>board tile</em> was actually triggered, and get its coordinates.
+Let's get the parent components from the second query:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+use bevy::log;
+
+// ..
+    let (coords, bomb, bomb_counter) = match parents.get(parent.0) {
+        Ok(v) =&gt; v,
+        Err(e) =&gt; {
+            log::error!(&quot;{}&quot;, e);
+            continue;
+        }
+    };
+<span class="boring">}
+</span></code></pre></pre>
+<p>We now have the <em>board tile</em> (the tile cover parent) <code>Coordinates</code> component and two <code>Option&lt;&gt;</code> for their potential <code>Bomb</code> and <code>BombNeighbor</code> components.</p>
+<p>Let's complete our function:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+// ..
+    // We remove the entity from the board covered tile map
+    match board.try_uncover_tile(coords) {
+        None =&gt; log::debug!(&quot;Tried to uncover an already uncovered tile&quot;),
+        Some(e) =&gt; log::debug!(&quot;Uncovered tile {} (entity: {:?})&quot;, coords, e),
+    }
+    if bomb.is_some() {
+        log::info!(&quot;Boom !&quot;);
+        // TODO: Add explosion event
+    }
+    // If the tile is empty..
+    else if bomb_counter.is_none() {
+        // .. We propagate the uncovering by adding the `Uncover` component to adjacent tiles
+        // which will then be removed next frame
+        for entity in board.adjacent_covered_tiles(*coords) {
+            commands.entity(entity).insert(Uncover);
+        }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>Since we <em>despawn</em> the triggered cover tile entity, we need to remove it from our <code>Board</code> calling <code>try_uncover_tile</code>.
+We also check if the board tile is a <strong>bomb</strong> and log <em>Boom !</em>.</p>
+<p>The final part will insert a new <code>Uncover</code> component to adjacent tile covers <strong>if</strong> the parent <em>board tile</em> is neither a <strong>bomb</strong> nor a <strong>bomb neighbor</strong>.
+This operation will propagate the uncovering process to the adjacent cover tiles for the next frame.
+This is not necessarily optimal, but it <em>delays computations</em>.</p>
+<p>All that is left is to register our new systems and our event to our <code>App</code> in <code>BoardPlugin</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use crate::events::*;
+
+// ..
+//   .add_system(systems::input::input_handling)
+    .add_system(systems::uncover::trigger_event_handler)
+    .add_system(systems::uncover::uncover_tiles)
+    .add_event::&lt;TileTriggerEvent&gt;();
+//..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's run our app !</p>
+<p><img src="docs/7_uncovering.gif" alt="Uncover GIF" /></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#safe-start" id="safe-start">Safe Start</a></h1>
+<p>We can uncover tiles, but a good minesweeper should provide a <em>safe start</em> uncovered zone.
+Let's activate the <code>BoardOptions</code> parameter in our <code>main.rs</code>:</p>
+<pre><code class="language-diff">// main.rs
+// ..
+    .insert_resource(BoardOptions {
+        // ..
++        safe_start: true,
+        // ..
+    }
+// ..
+</code></pre>
+<p>This option does nothing now, we need to implement it in our <code>board_plugin</code>.
+We want to find an <em>empty</em> tile and schedule its tile cover for uncovering, since we already have uncovering <em>systems</em> we will just insert a <code>Uncover</code> component on it.</p>
+<p>We need to retrieve the current <code>covered_tile_entity</code> to be able to uncover it.
+Since we want only one <em>safe start</em> we will add yet again a new argument for our <code>spawn_tiles</code> function.</p>
+<blockquote>
+<p>Clippy already says it has too many already !</p>
+</blockquote>
+<p>We will refactor it on part 9, let's get this working:</p>
+<pre><code class="language-diff">// lib.rs
+// ..
+fn spawn_tiles(
+        // ..
++        safe_start_entity: &amp;mut Option&lt;Entity&gt;,
+    ) {
+        // ..
+        covered_tiles.insert(coordinates, entity);
++       if safe_start_entity.is_none() &amp;&amp; *tile == Tile::Empty {
++         *safe_start_entity = Some(entity);
++       }
+}
+</code></pre>
+<p>And now we change our <code>setup_board</code> startup system accordingly:</p>
+<pre><code class="language-diff">// lib.rs
+// ..
++ let mut safe_start = None;
+commands
+     .spawn()
+     .insert(Name::new(&quot;Board&quot;))
+// ..
+Self::spawn_tiles(
+    //..
++     &amp;mut safe_start,
+);
+// ..
++ if options.safe_start {
++    if let Some(entity) = safe_start {
++        commands.entity(entity).insert(Uncover);
++    }
++ }
+// ..
+</code></pre>
+<p>And that's it ! if we run our app, it will uncover a safe area !</p>
+<p><img src="docs/8_safe_start.png" alt="Safe Start" /></p>
+<p><em>We get a pre-uncovered area</em></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#generic-states" id="generic-states">Generic States</a></h1>
+<p>Our board plugin is customizable through <code>BoardOptions</code>, but pour app can't interact with it.
+We need to make our <code>BoardPlugin</code> generic, to allow control through <a href="https://bevy-cheatbook.github.io/programming/states.html"><em>states</em></a>.</p>
+<h2><a class="header" href="#plugin-1" id="plugin-1">Plugin</a></h2>
+<p>Lets edit our plugin structure:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bevy::ecs::schedule::StateData;
+
+pub struct BoardPlugin&lt;T&gt; {
+    pub running_state: T,
+}
+
+impl&lt;T: StateData&gt; Plugin for BoardPlugin&lt;T&gt; {
+    fn build(&amp;self, app: &amp;mut App) {
+        // ..
+    }
+}
+
+impl&lt;T&gt; BoardPlugin&lt;T&gt; {
+    // ..
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Our plugin cannot know what <em>state</em> the app using it has defined, it needs to be generic.</p>
+<p>We can now change our systems structure to take in account this <code>running_state</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+fn build(&amp;self, app: &amp;mut App) {
+    // When the running states comes into the stack we load a board
+        app.add_system_set(
+            SystemSet::on_enter(self.running_state.clone()).with_system(Self::create_board),
+        )
+        // We handle input and trigger events only if the state is active
+        .add_system_set(
+            SystemSet::on_update(self.running_state.clone())
+                .with_system(systems::input::input_handling)
+                .with_system(systems::uncover::trigger_event_handler),
+        )
+        // We handle uncovering even if the state is inactive
+        .add_system_set(
+            SystemSet::on_in_stack_update(self.running_state.clone())
+                .with_system(systems::uncover::uncover_tiles),
+        )
+        .add_event::&lt;TileTriggerEvent&gt;();
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Bevy's states are in a <em>stack</em>:</p>
+<ul>
+<li>if a state is at the top of the stack it is considered <em>active</em></li>
+<li>if a state is in the stack but not at the top it is considered <em>inactive</em></li>
+<li>if a state leaves the stack it is considered <em>exited</em></li>
+<li>if a state enters the stack it is considered <em>entered</em></li>
+</ul>
+<p>So what did we do here:</p>
+<ul>
+<li>Since we now constrain systems with state conditions, everything is a <code>SystemSet</code></li>
+<li>Instead of a <code>startup_system</code> we call our <code>setup_board</code> system when our state <em>enters</em> the stack</li>
+<li>We handle our input, and the trigger events only if the state is <em>active</em> (we allow for paused states)</li>
+<li>The uncovering system should not be paused, so we run it if the state is in the stack, <em>active</em> or not.</li>
+</ul>
+<p>With this configuration the app using the plugin can have menus or other stuff and trigger our board generation with the <code>running_state</code>.
+But we need to be able to clean up the board in case the states <em>exits</em> the stack.</p>
+<p>For that the <code>Board</code> resource should have a reference to its own <code>Entity</code> to despawn it with all its children:</p>
+<pre><code class="language-diff">// board.rs
+// ..
+#[derive(Debug)]
+pub struct Board {
+    pub tile_map: TileMap,
+    pub bounds: Bounds2,
+    pub tile_size: f32,
+    pub covered_tiles: HashMap&lt;Coordinates, Entity&gt;,
++    pub entity: Entity,
+}
+// ..
+</code></pre>
+<p>Let's edit our <code>create_board</code> system to retrieve the entity:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+fn create_board(
+    // ..
+) {
+    // .. 
+    let board_entity = commands
+    //        .spawn()
+    //        .insert(Name::new(&quot;Board&quot;))
+    // ..
+    .id();
+    // ..
+    commands.insert_resource(Board {
+            // ..
+            entity: board_entity,
+        })
+
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Now we can register a cleaning system for our plugin:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+
+// ..
+fn build(&amp;self, app: &amp;mut App) {
+    //..
+    .add_system_set(
+        SystemSet::on_exit(self.running_state.clone())
+            .with_system(Self::cleanup_board),
+    )
+    // ..
+}
+
+impl&lt;T&gt; BoardPlugin&lt;T&gt; {
+    // ..
+    fn cleanup_board(board: Res&lt;Board&gt;, mut commands: Commands) {
+        commands.entity(board.entity).despawn_recursive();
+        commands.remove_resource::&lt;Board&gt;();
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p>What about all the tiles, the texts, the sprites, the covers, etc ?</p>
+</blockquote>
+<p>Since we spawned every board entity as children to our <code>board_entity</code>, using <code>despawn_recursive</code> will also despawn its children:</p>
+<ul>
+<li>the background</li>
+<li>the tiles</li>
+<li>the tile texts</li>
+<li>the tile sprites</li>
+<li>the tile covers</li>
+<li>etc.</li>
+</ul>
+<h2><a class="header" href="#app" id="app">App</a></h2>
+<p>Let's define some basic states:</p>
+<pre><pre class="playground"><code class="language-rust">// main.rs
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum AppState {
+    InGame,
+    Out,
+}
+
+fn main() {
+    // ..
+    .add_state(AppState::InGame)
+    .add_plugin(BoardPlugin {
+        running_state: AppState::InGame,
+    })
+}
+</code></pre></pre>
+<p>If we run the app now, nothing has changed, but if we edit the states we can completely control our board systems:</p>
+<pre><pre class="playground"><code class="language-rust">// main.rs
+use bevy::log;
+
+fn main() {
+    // ..
+    // State handling
+    .add_system(state_handler);
+    // ..
+}
+
+fn state_handler(mut state: ResMut&lt;State&lt;AppState&gt;&gt;, keys: Res&lt;Input&lt;KeyCode&gt;&gt;) {
+    if keys.just_pressed(KeyCode::C) {
+        log::debug!(&quot;clearing detected&quot;);
+        if state.current() == &amp;AppState::InGame {
+            log::info!(&quot;clearing game&quot;);
+            state.set(AppState::Out).unwrap();
+        }
+    }
+    if keys.just_pressed(KeyCode::G) {
+        log::debug!(&quot;loading detected&quot;);
+        if state.current() == &amp;AppState::Out {
+            log::info!(&quot;loading game&quot;);
+            state.set(AppState::InGame).unwrap();
+        }
+    }
+}
+</code></pre></pre>
+<p>Everything should be familiar here,</p>
+<ul>
+<li><code>state</code> is wrapped in <code>ResMut&lt;&gt;</code>, because states are handled like any resource but with an additional wrapper: <code>State&lt;&gt;</code></li>
+<li><code>keys</code> is an <code>Input&lt;&gt;</code> argument, allowing to check for keyboard interaction using <code>KeyCode</code> (it can be used with <code>MouseButton</code> for mouse interaction)</li>
+</ul>
+<p>Now pressing <strong>C</strong> should cleanup the board entirely, and pressing <strong>G</strong> should generate a new board.</p>
+<h2><a class="header" href="#exercise" id="exercise">Exercise</a></h2>
+<p>States can be tricky, so it's good to practice using it.</p>
+<p>Implement the following features:</p>
+<ol>
+<li>When I press <em>Escape</em> the game pauses and I can't interact with the board, if I press <em>Escape</em> again the game resumes.</li>
+<li>When I press <em>G</em> a new board generates, without having to press <em>C</em> first.</li>
+</ol>
+<p>Give me your answers on Twitter at <a href="https://twitter.com/ManevilleF">@ManevilleF</a></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#assets-1" id="assets-1">Assets</a></h1>
+<p>We have great board configuration with our <code>BoardOptions</code> resource but we hard coded every color, texture and fonts.
+Let's create a new configuration resource in <code>board_assets.rs</code> for our <code>board_plugin</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_assets.rs
+use bevy::prelude::*;
+use bevy::render::texture::DEFAULT_IMAGE_HANDLE;
+
+/// Material of a `Sprite` with a texture and color
+#[derive(Debug, Clone)]
+pub struct SpriteMaterial {
+    pub color: Color,
+    pub texture: Handle&lt;Image&gt;,
+}
+
+impl Default for SpriteMaterial {
+    fn default() -&gt; Self {
+        Self {
+            color: Color::WHITE,
+            texture: DEFAULT_IMAGE_HANDLE.typed(),
+        }
+    }
+}
+
+/// Assets for the board. Must be used as a resource.
+///
+/// Use the loader for partial setup
+#[derive(Debug, Clone)]
+pub struct BoardAssets {
+    /// Label
+    pub label: String,
+    ///
+    pub board_material: SpriteMaterial,
+    ///
+    pub tile_material: SpriteMaterial,
+    ///
+    pub covered_tile_material: SpriteMaterial,
+    ///
+    pub bomb_counter_font: Handle&lt;Font&gt;,
+    ///
+    pub bomb_counter_colors: Vec&lt;Color&gt;,
+    ///
+    pub flag_material: SpriteMaterial,
+    ///
+    pub bomb_material: SpriteMaterial,
+}
+
+impl BoardAssets {
+    /// Default bomb counter color set
+    pub fn default_colors() -&gt; Vec&lt;Color&gt; {
+        vec![
+            Color::WHITE,
+            Color::GREEN,
+            Color::YELLOW,
+            Color::ORANGE,
+            Color::PURPLE,
+        ]
+    }
+
+    /// Safely retrieves the color matching a bomb counter
+    pub fn bomb_counter_color(&amp;self, counter: u8) -&gt; Color {
+        let counter = counter.saturating_sub(1) as usize;
+        match self.bomb_counter_colors.get(counter) {
+            Some(c) =&gt; *c,
+            None =&gt; match self.bomb_counter_colors.last() {
+                None =&gt; Color::WHITE,
+                Some(c) =&gt; *c,
+            },
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Declare the module in <code>resources/mod.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// mod.rs
+// ..
+pub use board_assets::*;
+mod board_assets;
+<span class="boring">}
+</span></code></pre></pre>
+<p>This new resource will store every visual data we need and  allow customization.</p>
+<p>We also added a <code>bomb_counter_colors</code> field to customize the bomb neighbor text colors and made a utility <code>bomb_counter_color</code> method to retrieve it.</p>
+<blockquote>
+<p>What is this <code>DEFAULT_IMAGE_HANDLE</code> constant value?</p>
+</blockquote>
+<p>We copy the way <code>SpriteBundle</code> handles its default texture using the same hard coded <code>Handle&lt;Image&gt;</code> for a white texture.
+Now that we have the option for custom textures for everything from the tiles to the board background we will enable every <code>texture</code> field we omitted.</p>
+<h2><a class="header" href="#plugin-2" id="plugin-2">Plugin</a></h2>
+<p>Let's use our now resource in our <code>create_board</code> system in our <code>board_plugin</code>:</p>
+<pre><code class="language-diff">// lib.rs
++ use resources::BoardAssets;
+// ..
+
+    pub fn create_board(
+        mut commands: Commands,
+        board_options: Option&lt;Res&lt;BoardOptions&gt;&gt;,
++       board_assets: Res&lt;BoardAssets&gt;,
+        window: Res&lt;WindowDescriptor&gt;,
+-       asset_server: Res&lt;AssetServer&gt;,
+    ) {
+        // ..
+-     let font = asset_server.load(&quot;fonts/pixeled.ttf&quot;);
+-     let bomb_image = asset_server.load(&quot;sprites/bomb.png&quot;);
+      // ..
+
+      // Board background sprite:
+      parent
+                    .spawn_bundle(SpriteBundle {
+                        sprite: Sprite {
+-                            color: Color::WHITE
++                            color: board_assets.board_material.color,
+                            custom_size: Some(board_size),
+                            ..Default::default()
+                        },
++                       texture: board_assets.board_material.texture.clone(),
+                        transform: Transform::from_xyz(board_size.x / 2., board_size.y / 2., 0.),
+                        ..Default::default()
+                    })
+        // ..
+        Self::spawn_tiles(
+                    parent,
+                    &amp;tile_map,
+                    tile_size,
+                    options.tile_padding,
+-                   Color::GRAY,
+-                   bomb_image,
+-                   font,
+-                   Color::DARK_GRAY,
++                   &amp;board_assets,
+                    &amp;mut covered_tiles,
+                    &amp;mut safe_start,
+                );
+        // ..
+    }
+</code></pre>
+<p>We remove the <code>asset_server</code> argument.</p>
+<blockquote>
+<p>Why is <code>board_assets</code> not optional?</p>
+</blockquote>
+<p>Making it optional is not easy because bevy doesn't provide a default font <code>Handle</code>. It would require advanced engine manipulation like using <code>FromWorld</code> and <code>Assets</code> implementations and using a hard coded font or font path.</p>
+<blockquote>
+<p>But <code>Handle</code> implements <code>Default</code></p>
+</blockquote>
+<p>Indeed but then either the app will panic when trying to print out text or nothing will show up.</p>
+<hr />
+<p>Our <code>spawn_tiles</code> and <code>bomb_count_text_bundle</code> functions should be cleaned up as well:</p>
+<pre><code class="language-diff">// lib.rs
+
+fn spawn_tiles(
+        parent: &amp;mut ChildBuilder,
+        tile_map: &amp;TileMap,
+        size: f32,
+        padding: f32,
+-       color: Color,
+-       bomb_image: Handle&lt;Image&gt;,
+-       font: Handle&lt;Font&gt;,
+-       covered_tile_color: Color,
++       board_assets: &amp;BoardAssets,
+        covered_tiles: &amp;mut HashMap&lt;Coordinates, Entity&gt;,
+        safe_start_entity: &amp;mut Option&lt;Entity&gt;,
+    ) {
+        // ..
+        // Tile sprite
+        cmd.insert_bundle(SpriteBundle {
+                    sprite: Sprite {
+-                       color
++                       color: board_assets.tile_material.color,
+                        custom_size: Some(Vec2::splat(size - padding)),
+                        ..Default::default()
+                    },
+                    transform: Transform::from_xyz(
+                        (x as f32 * size) + (size / 2.),
+                        (y as f32 * size) + (size / 2.),
+                        1.,
+                    ),
++                   texture: board_assets.tile_material.texture.clone(),
+                    ..Default::default()
+                })
+                // ..
+                // Tile Cover
+           let entity = parent
+                        .spawn_bundle(SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::splat(size - padding)),
+-                               color: covered_tile_color,
++                               color: board_assets.covered_tile_material.color,
+                                ..Default::default()
+                            },
++                           texture: board_assets.covered_tile_material.texture.clone(),
+                            transform: Transform::from_xyz(0., 0., 2.),
+                            ..Default::default()
+                        })
+                        .insert(Name::new(&quot;Tile Cover&quot;))
+                        .id();
+                // ..
+                // Bomb neighbor text
+                parent.spawn_bundle(Self::bomb_count_text_bundle(
+                                *v,
+-                               font.clone(),
++                               board_assets,
+                                size - padding,
+                            ));
+}
+
+fn bomb_count_text_bundle(
+        count: u8,
+-       font: Handle&lt;Font&gt;,        
++       board_assets: &amp;BoardAssets,
+        size: f32,
+    ) -&gt; Text2dBundle {
+        // We retrieve the text and the correct color
+-       let (text, color) = (
+-           count.to_string(),
+-           match count {
+-               1 =&gt; Color::WHITE,
+-               2 =&gt; Color::GREEN,
+-               3 =&gt; Color::YELLOW,
+-               4 =&gt; Color::ORANGE,
+-               _ =&gt; Color::PURPLE,
+-           },
+-       );
++       let color = board_assets.bomb_counter_color(count);
+        // We generate a text bundle
+        Text2dBundle {
+            text: Text {
+                sections: vec![TextSection {
+-                   value: text,
++                   value: count.to_string(),
+                    style: TextStyle {
+                        color,
+-                       font,
++                       font: board_assets.bomb_counter_font.clone(),
+                        font_size: size,
+                    },
+                }],
+     // ..           
+</code></pre>
+<p>We now use only our <code>BoardAssets</code> resource for every visual element of the board.</p>
+<h2><a class="header" href="#app-1" id="app-1">App</a></h2>
+<p>We need to set a <code>BoardAssets</code> resource, but we have an issue. Loading our assets must be in a <em>system</em>, here a <em>startup system</em>, but we need to do it <strong>before</strong> our plugin launches its <code>setup_board</code> system or it will panic.</p>
+<p>So let's prevent this situation by setting our state to <code>Out</code>:</p>
+<pre><code class="language-diff">// main.rs
+
+fn main() {
+    // ..
+-   .add_state(AppState::InGame)
++   .add_state(AppState::Out)
+    // ..
+}
+</code></pre>
+<p>and registering a <code>setup_board</code> startup system, and moving the previous board setup into it</p>
+<pre><code class="language-diff">// main.rs
+
+fn main() {
+    // ..
+-   app.insert_resource(BoardOptions {
+-       map_size: (20, 20),
+-       bomb_count: 40,
+-       tile_padding: 3.0,
+-       safe_start: true,
+-       ..Default::default()
+-   })
+    // ..
++    .add_startup_system(setup_board)
+    // ..
+}
+</code></pre>
+<p>We can declare the new system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// main.rs
+use board_plugin::resources::{BoardAssets, SpriteMaterial};
+
+// ..
+fn setup_board(
+    mut commands: Commands,
+    mut state: ResMut&lt;State&lt;AppState&gt;&gt;,
+    asset_server: Res&lt;AssetServer&gt;,
+) {
+    // Board plugin options
+    commands.insert_resource(BoardOptions {
+        map_size: (20, 20),
+        bomb_count: 40,
+        tile_padding: 1.,
+        safe_start: true,
+        ..Default::default()
+    });
+    // Board assets
+    commands.insert_resource(BoardAssets {
+        label: &quot;Default&quot;.to_string(),
+        board_material: SpriteMaterial {
+            color: Color::WHITE,
+            ..Default::default()
+        },
+        tile_material: SpriteMaterial {
+            color: Color::DARK_GRAY,
+            ..Default::default()
+        },
+        covered_tile_material: SpriteMaterial {
+            color: Color::GRAY,
+            ..Default::default()
+        },
+        bomb_counter_font: asset_server.load(&quot;fonts/pixeled.ttf&quot;),
+        bomb_counter_colors: BoardAssets::default_colors(),
+        flag_material: SpriteMaterial {
+            texture: asset_server.load(&quot;sprites/flag.png&quot;),
+            color: Color::WHITE,
+        },
+        bomb_material: SpriteMaterial {
+            texture: asset_server.load(&quot;sprites/bomb.png&quot;),
+            color: Color::WHITE,
+        },
+    });
+    // Plugin activation
+    state.set(AppState::InGame).unwrap();
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Using the generic state system we set up in the <a href="./8_states.html">previous part</a> we control when we want the plugin to launch.
+Here, we want it to launch <em>after</em> we loaded our assets and set up the <code>BoardAssets</code> resource.
+That's why we first set our <em>state</em> to <code>Out</code> and set it to <code>InGame</code> once our assets are ready.</p>
+<p>Our plugin is now completely modular and has zero hard coded values, everything from the board size to the tile colors can be customized.</p>
+<blockquote>
+<p>Can we edit the theme at runtime?</p>
+</blockquote>
+<p>Yes ! the <code>BoardAssets</code> resource is available to every system,
+but everything that is not a <code>Handle</code> won't be applied until the next generation. For a more dynamic system you can check my plugin <a href="https://github.com/ManevilleF/bevy_sprite_material">bevy_sprite_material</a>.</p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#marking-tiles" id="marking-tiles">Marking tiles</a></h1>
+<p>Our minesweeper plugin is almost done, we still miss a very important feature: Marking tiles.
+Also, you may notice that the app is quite slow, especially with large tile maps. Let's fix that first.</p>
+<h2><a class="header" href="#optimizations" id="optimizations">Optimizations</a></h2>
+<p>Add the following <a href="https://bevy-cheatbook.github.io/pitfalls/performance.html">optimization levels</a> in our app's <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml"># Enable optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package.&quot;*&quot;]
+opt-level = 3
+
+# Maybe also enable only a small amount of optimization for our code:
+[profile.dev]
+opt-level = 1
+</code></pre>
+<p><em>This won't enable as many optimizations as a <code>release</code> build, but you should notice significant improvements</em></p>
+<h2><a class="header" href="#events-1" id="events-1">Events</a></h2>
+<p>To complete the gameplay we need to provide three additional events in our <code>board_plugin/src/events.rs</code>.</p>
+<h3><a class="header" href="#board-completed-event" id="board-completed-event">Board completed event</a></h3>
+<p>This event will be sent at the board completion, allowing apps using our plugin to detect victory and maybe trigger some elements (victory screen, score, etc)</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Copy, Clone)]
+pub struct BoardCompletedEvent;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#bomb-explosion-event" id="bomb-explosion-event">Bomb explosion event</a></h3>
+<p>This event will be sent every time the player uncovers a bomb, allowing apps using our plugin to detect it.
+Our plugin won't interrupt the game itself, by doing an event instead we allow apps to maybe trigger loss at 3 bombs or immediately.
+This method is much more modular than adding a configuration.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Copy, Clone)]
+pub struct BombExplosionEvent;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#tile-mark-event" id="tile-mark-event">Tile mark event</a></h3>
+<p>This event is the equivalent of <code>TileTriggerEvent</code> but for the right click.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Copy, Clone)]
+pub struct TileMarkEvent(pub Coordinates);
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#resources-2" id="resources-2">Resources</a></h2>
+<p>Let's edit our <code>Board</code> resource to handle tile marking (flags):</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+use bevy::log;
+
+#[derive(Debug)]
+pub struct Board {
+    // ..
+    pub marked_tiles: Vec&lt;Coordinates&gt;,
+}
+
+impl Board {
+    // ..
+
+    /// Removes the `coords` from `marked_tiles`
+    fn unmark_tile(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;Coordinates&gt; {
+        let pos = match self.marked_tiles.iter().position(|a| a == coords) {
+            None =&gt; {
+                log::error!(&quot;Failed to unmark tile at {}&quot;, coords);
+                return None;
+            }
+            Some(p) =&gt; p,
+        };
+        Some(self.marked_tiles.remove(pos))
+    }
+
+    /// Is the board complete
+    pub fn is_completed(&amp;self) -&gt; bool {
+        self.tile_map.bomb_count() as usize == self.covered_tiles.len()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>We add:</p>
+<ul>
+<li>a new field storing the various marked coordinates</li>
+<li>a public method checking the board completion.</li>
+<li>a private method to remove coordinates from the new field</li>
+</ul>
+<p>Let's edit the <code>tile_to_uncover</code>method  and check for marked tiles:</p>
+<pre><code class="language-diff">// board.rs
+pub fn tile_to_uncover(&amp;self, coords: &amp;Coordinates) -&gt; Option&lt;&amp;Entity&gt; {
++   if self.marked_tiles.contains(coords) {
++       None
++   } else {
+        self.covered_tiles.get(coords)
++   }
+}
+</code></pre>
+<p>Instead of directly returning the covered tile entity, we check if the tile is marked. This will prevent uncovering marked tiles by clicking on it.</p>
+<p>Let's change the <code>try_uncover_tile</code> method as well to remove the marked coordinates on uncovering.</p>
+<pre><code class="language-diff">// board.rs
+pub fn try_uncover_tile(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;Entity&gt; {
+ +   if self.marked_tiles.contains(coords) {
+ +      self.unmark_tile(coords)?;
+ +  }
+    self.covered_tiles.remove(coords)
+}
+</code></pre>
+<p>We can now create the <code>try_toggle_mark</code> method:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+
+    /// We try to mark or unmark a tile, returning the entity and if the tile is marked
+    pub fn try_toggle_mark(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;(Entity, bool)&gt; {
+        let entity = *self.covered_tiles.get(coords)?;
+        let mark = if self.marked_tiles.contains(coords) {
+            self.unmark_tile(coords)?;
+            false
+        } else {
+            self.marked_tiles.push(*coords);
+            true
+        };
+        Some((entity, mark))
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#systems-1" id="systems-1">Systems</a></h2>
+<h3><a class="header" href="#uncover-2" id="uncover-2">Uncover</a></h3>
+<p>Let's edit our uncovering system to check for board completion.</p>
+<p>We also need to send our new <code>BombExplosionEvent</code>.</p>
+<pre><code class="language-diff">// uncover.rs
++ use crate::{BoardCompletedEvent, BombExplosionEvent};
+
+pub fn uncover_tiles(
+    // ..
++   mut board_completed_event_wr: EventWriter&lt;BoardCompletedEvent&gt;,
++   mut bomb_explosion_event_wr: EventWriter&lt;BombExplosionEvent&gt;,
+) {
+    // match board.try_uncover_tile(coords) {}
+    // ..
++   if board.is_completed() {
++       log::info!(&quot;Board completed&quot;);
++       board_completed_event_wr.send(BoardCompletedEvent);
++   }
+    if bomb.is_some() {
+        log::info!(&quot;Boom !&quot;);
+-       // TODO: generate an event
++       bomb_explosion_event_wr.send(BombExplosionEvent);
+    }
+    //..
+}
+</code></pre>
+<h3><a class="header" href="#input-1" id="input-1">Input</a></h3>
+<p>Let's edit our <code>input_handling</code> system and send our new event for a <em>right click</em>:</p>
+<pre><code class="language-diff">// input.rs
++ use crate::TileMarkEvent;
+
+pub fn input_handling(
+    // ..
++   mut tile_mark_ewr: EventWriter&lt;TileMarkEvent&gt;,
+) {
+    // ..
+-   // TODO: generate an event
++   tile_mark_ewr.send(TileMarkEvent(coordinates));
+    // ..
+}
+</code></pre>
+<h3><a class="header" href="#mark" id="mark">Mark</a></h3>
+<p>Let's create a <code>mark</code> module in our plugin <code>systems</code> with a <code>mark_tiles</code> system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// systems/mod.rs
+pub mod mark;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// mark.rs
+se crate::{Board, BoardAssets, TileMarkEvent};
+use bevy::log;
+use bevy::prelude::*;
+
+pub fn mark_tiles(
+    mut commands: Commands,
+    mut board: ResMut&lt;Board&gt;,
+    board_assets: Res&lt;BoardAssets&gt;,
+    mut tile_mark_event_rdr: EventReader&lt;TileMarkEvent&gt;,
+    query: Query&lt;&amp;Children&gt;,
+) {
+    for event in tile_mark_event_rdr.iter() {
+        if let Some((entity, mark)) = board.try_toggle_mark(&amp;event.0) {
+            if mark {
+                commands.entity(entity).with_children(|parent| {
+                    parent
+                        .spawn_bundle(SpriteBundle {
+                            texture: board_assets.flag_material.texture.clone(),
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::splat(board.tile_size)),
+                                color: board_assets.flag_material.color,
+                                ..Default::default()
+                            },
+                            transform: Transform::from_xyz(0., 0., 1.),
+                            ..Default::default()
+                        })
+                        .insert(Name::new(&quot;Flag&quot;));
+                });
+            } else {
+                let children = match query.get(entity) {
+                    Ok(c) =&gt; c,
+                    Err(e) =&gt; {
+                        log::error!(&quot;Failed to retrieve flag entity components: {}&quot;, e);
+                        continue;
+                    }
+                };
+                for child in children.iter() {
+                    commands.entity(*child).despawn_recursive();
+                }
+            }
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>We have familiar arguments, and a new <code>Query</code> on <code>Children</code> entities which we will use for children of <em>tile cover</em> entities (flags).</p>
+<blockquote>
+<p><strong>Note:</strong> <em>This query could be optimized with a new <code>TileCover</code> component, therefore avoiding querying every entity with children</em></p>
+</blockquote>
+<p>The function iterates through our <code>TileMarkEvent</code> reader and will attempt to toggle marks on the <code>Board</code> resource.
+If the tile is marked, we spawn a flag sprite, using the <code>BoardAssets</code>, otherwise we despawn all tile cover children.
+We could store entity references or use a custom <code>Flag</code> component to avoid this hard despawn operation, but we won't add any other children to the tile cover entities.</p>
+<h2><a class="header" href="#plugin-3" id="plugin-3">Plugin</a></h2>
+<p>Let's register our new events and systems:</p>
+<pre><code class="language-diff">// lib.rs
+
+impl&lt;T: StateData&gt; Plugin for BoardPlugin&lt;T&gt; {
+    fn build(&amp;self, app: &amp;mut AppBuilder) {
+        // ..
+        // We handle uncovering even if the state is inactive
+        .add_system_set(
+            SystemSet::on_in_stack_update(self.running_state.clone())
+                .with_system(systems::uncover::uncover_tiles)
++               .with_system(systems::mark::mark_tiles), // We add our new mark system
+        )
+        .add_system_set(
+            SystemSet::on_exit(self.running_state.clone()).with_system(Self::cleanup_board),
+        )
+        .add_event::&lt;TileTriggerEvent&gt;()
++       .add_event::&lt;TileMarkEvent&gt;()
++       .add_event::&lt;BombExplosionEvent&gt;()
++       .add_event::&lt;BoardCompletedEvent&gt;();
+    }
+}
+
+impl&lt;T&gt; Board&lt;T&gt; {
+    fn setup_board(
+        // ..
+    ) {
+        // ..
+        commands.insert_resource(Board {
+            // ..
++           marked_tiles: Vec::new(),
+            // ..
+        })
+
+    }
+}
+</code></pre>
+<p>That's it ! We have a complete Minesweeper plugin !</p>
+<p><img src="docs/11_board.png" alt="Gameplay" /></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+<blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#wasm-build" id="wasm-build">WASM Build</a></h1>
+<p>Let's make our project run on browser:</p>
+<p>Let's change our <code>board_plugin/Cargo.toml</code>:</p>
+<pre><code class="language-diff">[dependencies]
+- # Engine
+- bevy = &quot;0.6&quot;
+
+# Serialization
+serde = &quot;1.0&quot;
+
+# Random
+rand = &quot;0.8&quot;
+
+# Console Debug
+colored = { version = &quot;2.0&quot;, optional = true }
+# Hierarchy inspector debug
+bevy-inspector-egui = { version = &quot;0.8&quot;, optional = true }
+
++ # Engine
++ [dependencies.bevy]
++ version = &quot;0.6&quot;
++ default-features = false
++ features = [&quot;render&quot;]
+
++ # Dependencies for WASM only
++ [target.'cfg(target_arch = &quot;wasm32&quot;)'.dependencies.getrandom]
++ version=&quot;0.2&quot;
++ features=[&quot;js&quot;]
+</code></pre>
+<p>We only need one feature of the <code>bevy</code> dependency so we improve its declaration, and we add a new dependency only for <code>wasm</code> targets which improves <code>rand</code> on browser.</p>
+<p>Now we edit the main <code>Cargo.toml</code>:</p>
+<pre><code class="language-diff">[dependencies]
+- bevy = &quot;0.6&quot;
+board_plugin = { path = &quot;board_plugin&quot; }
+
+# Hierarchy inspector debug
+bevy-inspector-egui = { version = &quot;0.8&quot;, optional = true }
+
+
++ [dependencies.bevy]
++ version = &quot;0.6&quot;
++ default-features = false
++ features = [&quot;render&quot;, &quot;bevy_winit&quot;, &quot;png&quot;]
+
++ # Dependencies for native only.
++ [target.'cfg(not(target_arch = &quot;wasm32&quot;))'.dependencies.bevy]
++ version = &quot;0.6&quot;
++ default-features = false
++ features = [&quot;x11&quot;]
+
+[workspace]
+members = [
+    &quot;board_plugin&quot;
+]
+</code></pre>
+<p>We can also disable the default features of <code>bevy</code> and only enable the useful ones. We add the <code>x11</code> feature only for native use to avoid compilation issue for web assembly.</p>
+<p>And.. That's it ! The app can now compile and run natively on wasm.</p>
+<p>Let's improve a bit by adding a cargo config in <code>.cargo/config.toml</code>:</p>
+<pre><code class="language-toml">[target.wasm32-unknown-unknown]
+runner = &quot;wasm-server-runner&quot;
+
+[alias]
+serve = &quot;run --target wasm32-unknown-unknown&quot;
+</code></pre>
+<p>Then install the runner:
+<code>cargo install wasm-server-runner</code></p>
+<p>you may now directly execute <code>cargo serve</code> and test your app on your browser !
+You may also try the <a href="https://qonfucius.gitlab.io/minesweeper-tutorial/">live version</a></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>

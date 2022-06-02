@@ -1,0 +1,617 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Board - Bevy Minesweeper Tutorial</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html" class="active"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#the-board" id="the-board">The Board</a></h1>
+<p>We have our tile map but still nothing on screen, let's create some tiles !</p>
+<h2><a class="header" href="#board-options" id="board-options">Board options</a></h2>
+<p>To comply with our objective of making a completely modular plugin we must first provide generation options.
+We will now create a nice configuration resource like bevy's <code>WindowDescriptor</code> we saw in <a href="./1_setup.html">Part 1</a>.</p>
+<p>Create a <code>board_options</code> module in our plugin</p>
+<pre><code>├── Cargo.toml
+└── src
+    ├── components
+    │   ├── coordinates.rs
+    │   └── mod.rs
+    ├── lib.rs
+    └── resources
+        ├── board_options.rs
+        ├── mod.rs
+        ├── tile.rs
+        └── tile_map.rs
+</code></pre>
+<p>and add it to the <code>mod.rs</code> file:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ..
+pub use board_options::*;
+
+mod board_options;
+<span class="boring">}
+</span></code></pre></pre>
+<p>We want the following options:</p>
+<ul>
+<li>All tile map options (width, height and bomb count)</li>
+<li>Custom Padding between tile sprites</li>
+<li>Custom tile size or window adaptive size</li>
+<li>Custom board world position or window centered with optional offset</li>
+<li>Optional safe uncovered start zone</li>
+</ul>
+<blockquote>
+<p>That's a lot !</p>
+</blockquote>
+<p>It is, but the more, the merrier ! Let's do this:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_options.rs
+use bevy::prelude::Vec3;
+use serde::{Deserialize, Serialize};
+
+/// Tile size options
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum TileSize {
+    /// Fixed tile size
+    Fixed(f32),
+    /// Window adaptative tile size
+    Adaptive { min: f32, max: f32 },
+}
+
+/// Board position customization options
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum BoardPosition {
+    /// Centered board
+    Centered { offset: Vec3 },
+    /// Custom position
+    Custom(Vec3),
+}
+
+/// Board generation options. Must be used as a resource
+// We use serde to allow saving option presets and loading them at runtime
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BoardOptions {
+    /// Tile map size
+    pub map_size: (u16, u16),
+    /// bomb count
+    pub bomb_count: u16,
+    /// Board world position
+    pub position: BoardPosition,
+    /// Tile world size
+    pub tile_size: TileSize,
+    /// Padding between tiles
+    pub tile_padding: f32,
+    /// Does the board generate a safe place to start
+    pub safe_start: bool,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>This seems complex but if we implement good <code>Default</code> implementations our the options will be very easy to use</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_options.rs
+
+impl Default for TileSize {
+    fn default() -&gt; Self {
+        Self::Adaptive {
+            min: 10.0,
+            max: 50.0,
+        }
+    }
+}
+
+impl Default for BoardPosition {
+    fn default() -&gt; Self {
+        Self::Centered {
+            offset: Default::default(),
+        }
+    }
+}
+
+impl Default for BoardOptions {
+    fn default() -&gt; Self {
+        Self {
+            map_size: (15, 15),
+            bomb_count: 30,
+            position: Default::default(),
+            tile_size: Default::default(),
+            tile_padding: 0.,
+            safe_start: false,
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>let's register our new resource to our app:</p>
+<pre><code class="language-diff">// main.rs
++ use board_plugin::resources::BoardOptions;
+
+fn main() {
+    let mut app = App::new();
+    // Window setup
+    app.insert_resource(WindowDescriptor {
+        title: &quot;Mine Sweeper!&quot;.to_string(),
+        width: 700.,
+        height: 800.,
+        ..Default::default()
+    })
+    // Bevy default plugins
+    .add_plugins(DefaultPlugins);
+    #[cfg(feature = &quot;debug&quot;)]
+    // Debug hierarchy inspector
+    app.add_plugin(WorldInspectorPlugin::new());
++     // Board plugin options
++     app.insert_resource(BoardOptions {
++         map_size: (20, 20),
++         bomb_count: 40,
++         tile_padding: 3.0,
++         ..Default::default()
++     })
+    .add_plugin(BoardPlugin)
+    // Startup system (cameras)
+    .add_startup_system(camera_setup);
+    // Run the app
+    app.run();
+}
+</code></pre>
+<h2><a class="header" href="#board-generation" id="board-generation">Board generation</a></h2>
+<p>Now that we have a generation option resource, let's use in our plugin to build our first board.
+Let's edit our <code>create_board</code> startup system:</p>
+<h3><a class="header" href="#params-and-tile-map" id="params-and-tile-map">Params and tile map</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::BoardOptions;
+
+// ..
+pub fn create_board(
+        mut commands: Commands,
+        board_options: Option&lt;Res&lt;BoardOptions&gt;&gt;,
+        window: Res&lt;WindowDescriptor&gt;,
+    ) {}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Notice we added parameters to our system:</p>
+<ul>
+<li><code>Commands</code> as we will spawn entities and components</li>
+<li><code>Option&lt;Res&lt;BoardOption&gt;&gt;</code> is our new generation option resource, but optional !</li>
+<li><code>Res&lt;WindowDescriptor&gt;</code> is the window configuration resource we set up in our <code>main.rs</code></li>
+</ul>
+<p>/!\ <em>At the time of writing this tutorial I realized that since the <code>WindowDescriptor</code> resource is optional our system will panic if no window configuration is set up.
+A better practice would be to use it in an <code>Option&lt;&gt;</code> like our <code>BoardOptions</code> or access the <code>Windows</code> resource directly.</em></p>
+<p>Since our generation options are optional we need to use the <code>Default</code> implementation if it is not set:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ..
+let options = match board_options {
+     None =&gt; BoardOptions::default(), // If no options is set we use the default one
+     Some(o) =&gt; o.clone(),
+};
+<span class="boring">}
+</span></code></pre></pre>
+<p>We can now generate our tile map:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ..
+// Tilemap generation
+let mut tile_map = TileMap::empty(options.map_size.0, options.map_size.1);
+tile_map.set_bombs(options.bomb_count);
+#[cfg(feature = &quot;debug&quot;)]
+// Tilemap debugging
+log::info!(&quot;{}&quot;, tile_map.console_output());
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#tile-size" id="tile-size">Tile size</a></h3>
+<p>We added options for the tile size, and one determining tile size according to the window.
+If the option is selected we must compute the tile size between the window, and the tile map dimensions.</p>
+<p>Add the following method to <code>BoardPlugin</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+/// Computes a tile size that matches the window according to the tile map size
+fn adaptative_tile_size(
+    window: Res&lt;WindowDescriptor&gt;,
+    (min, max): (f32, f32), // Tile size constraints
+    (width, height): (u16, u16), // Tile map dimensions
+) -&gt; f32 {
+    let max_width = window.width / width as f32;
+    let max_heigth = window.height / height as f32;
+    max_width.min(max_heigth).clamp(min, max)
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's use it in our <code>create_board</code> system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::TileSize;
+
+// ..
+// We define the size of our tiles in world space
+let tile_size = match options.tile_size {
+    TileSize::Fixed(v) =&gt; v,
+    TileSize::Adaptive { min, max } =&gt; Self::adaptative_tile_size(
+        window,
+        (min, max),
+        (tile_map.width(), tile_map.height()),
+    ),
+};
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#board-creation" id="board-creation">Board creation</a></h3>
+<p>We can now compute the board <em>world size</em> and <em>world_position</em></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use resources::BoardPosition;
+
+// ..
+// We deduce the size of the complete board
+let board_size = Vec2::new(
+    tile_map.width() as f32 * tile_size,
+    tile_map.height() as f32 * tile_size,
+);
+log::info!(&quot;board size: {}&quot;, board_size);
+// We define the board anchor position (bottom left)
+let board_position = match options.position {
+    BoardPosition::Centered { offset } =&gt; {
+        Vec3::new(-(board_size.x / 2.), -(board_size.y / 2.), 0.) + offset
+    }
+    BoardPosition::Custom(p) =&gt; p,
+};
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p>That's a weird computation</p>
+</blockquote>
+<p>I make the choice here to anchor the board at the bottom left instead of the center in order to place all the tile children
+in positive relative positions.</p>
+<p><img src="docs/4_board_coords.png" alt="Coordinates" /></p>
+<p><em>The actual board object will be on the bottom left of the visible board</em></p>
+<p>We can now create our board:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+commands
+            .spawn()
+            .insert(Name::new(&quot;Board&quot;))
+            .insert(Transform::from_translation(board_position))
+            .insert(GlobalTransform::default());
+<span class="boring">}
+</span></code></pre></pre>
+<p>If we run the app we now have an empty board with three components:</p>
+<ul>
+<li>a <code>Name</code> (which will be used by the inspector GUI)</li>
+<li>a <code>Transform</code>, which describe its local <strong>translation</strong>, <strong>scale</strong> and <strong>rotation</strong></li>
+<li>a <code>GlobalTransform</code> which describes the same values as <code>Transform</code> but globally</li>
+</ul>
+<p>Note that we have to create both <code>Transform</code> and  <code>GlobalTransform</code> but we <strong>never</strong> set the global one.
+If one is missing, the entire hierarchy will not behave as expected.</p>
+<p>Let's create the Board background: Add the following to the <code>spawn</code> code</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+    .with_children(|parent| {
+                // We spawn the board background sprite at the center of the board, since the sprite pivot is centered
+                parent
+                    .spawn_bundle(SpriteBundle {
+                        sprite: Sprite {
+                            color: Color::WHITE,
+                            custom_size: Some(board_size),
+                            ..Default::default()
+                        },
+                        transform: Transform::from_xyz(board_size.x / 2., board_size.y / 2., 0.),
+                        ..Default::default()
+                    })
+                    .insert(Name::new(&quot;Background&quot;));
+            });
+<span class="boring">}
+</span></code></pre></pre>
+<p>So what is happening here:
+First we use <code>with_children</code>, giving us a builder similar to <code>Commands</code> but to spawn children objects to our Board.
+Then we spawn a new &quot;Background&quot; entity with a <code>SpriteBundle</code> (note that all built-in <strong>Component Bundles</strong> already have <code>Transform</code> and <code>GlobalTransform</code> components):</p>
+<ul>
+<li><code>sprite</code>: we create a basic rectangle of the size of our board with a white color.</li>
+<li><code>transform</code>: Sprite anchors are centered, since we put our board to the bottom left, we want to put this background in the center of the board.</li>
+</ul>
+<p><img src="docs/4_board_coords_2.png" alt="Background Coordinates" /></p>
+<p><em>The background is positioned in the center</em></p>
+<p>Let's spawn the tiles !</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use components::Coordinates;
+
+// ..
+    .with_children(|parent| {
+        
+        // ..
+
+        // Tiles
+        for (y, line) in tile_map.iter().enumerate() {
+                    for (x, tile) in line.iter().enumerate() {
+                        parent
+                            .spawn_bundle(SpriteBundle {
+                                sprite: Sprite {
+                                    color: Color::GRAY,
+                                    custom_size: Some(Vec2::splat(
+                                        tile_size - options.tile_padding as f32,
+                                    )),
+                                    ..Default::default()
+                                },
+                                transform: Transform::from_xyz(
+                                    (x as f32 * tile_size) + (tile_size / 2.),
+                                    (y as f32 * tile_size) + (tile_size / 2.),
+                                    1.,
+                                ),
+                                ..Default::default()
+                            })
+                            .insert(Name::new(format!(&quot;Tile ({}, {})&quot;, x, y)))
+                            // We add the `Coordinates` component to our tile entity
+                            .insert(Coordinates {
+                                x: x as u16,
+                                y: y as u16,
+                            });
+                    }
+                }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>We iterate through the tile map and spawn a new entity for each tile using a <code>SpriteBundle</code> again. We also add a <code>Coordinates</code> component for each tile.
+Note that for the <code>z</code> value of the <code>Transform</code> we put <code>1.</code>, so the tile is closer to the camera than the background, and therefore printed on top of the background.</p>
+<p>Let's run our app with the <code>debug</code> feature</p>
+<p><code>cargo run --features debug</code></p>
+<p><img src="docs/4_inspector_gui.png" alt="Inspector GUI" /></p>
+<p>Our board is generated and we can observe the difference between <code>Transform</code> and <code>GlobalTransform</code>.</p>
+<ul>
+<li>Our board entity <code>Transform</code> and <code>GlobalTransform</code> are identical because this entity doesn't have a parent</li>
+<li>Our tiles <code>Transform</code> <em>translation</em> are relative to their parent, the board entity, giving the real <em>translation</em> in the <code>GlobalTransform</code> component.</li>
+</ul>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="3_tile_map.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="5_tiles&amp;components.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="3_tile_map.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="5_tiles&amp;components.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

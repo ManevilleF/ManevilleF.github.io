@@ -1,0 +1,23 @@
+[book]
+title = "Bevy Minesweeper Tutorial"
+authors =  [
+    "Felix de Maneville: <felix.maneville@gmail.com>"
+]
+description = "Bevy tutorial to build a simple 2D Minesweeper"
+language = "en"
+multilingual = false
+src = "."
+
+[rust]
+edition = "2021"
+
+[build]
+build-dir = "../../public/bevy_minesweeper_tutorial"
+create-missing = false
+
+[preprocessor.graphviz]
+command = "mdbook-graphviz"
+
+[preprocessor.links]
+
+[preprocessor.index]

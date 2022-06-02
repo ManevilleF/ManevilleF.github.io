@@ -1,0 +1,457 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Project Set Up - Bevy Minesweeper Tutorial</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html" class="active"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#set-up" id="set-up">Set Up</a></h1>
+<p>One of the purposes of this tutorial is to create a <em>generic plugin</em> that can be embedded in any app.
+To do this we will initialize <strong>two</strong> nested cargo projects.</p>
+<h2><a class="header" href="#cargo-setup" id="cargo-setup">Cargo setup</a></h2>
+<p>The main binary app:</p>
+<ul>
+<li><code>cargo init --bin . --name minesweeper-tutorial </code></li>
+</ul>
+<p>And the board plugin:</p>
+<ul>
+<li><code>cargo init --lib board_plugin </code></li>
+</ul>
+<p>Your directory should look like this:</p>
+<pre><code>├── Cargo.toml
+├── board_plugin
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+└── src
+    └── main.rs
+</code></pre>
+<h2><a class="header" href="#board-plugin-config" id="board-plugin-config">Board plugin config</a></h2>
+<h3><a class="header" href="#cargotoml" id="cargotoml">Cargo.toml</a></h3>
+<p>Add the following elements to the <code>board_plugin/Cargo.toml</code> file:</p>
+<pre><code class="language-toml">[features]
+default = []
+debug = [&quot;colored&quot;, &quot;bevy-inspector-egui&quot;]
+
+[dependencies]
+# Engine
+bevy = &quot;0.6&quot;
+
+# Serialization
+serde = &quot;1.0&quot;
+
+# Random
+rand = &quot;0.8&quot;
+
+# Console Debug
+colored = { version = &quot;2.0&quot;, optional = true }
+# Hierarchy inspector debug
+bevy-inspector-egui = { version = &quot;0.8&quot;, optional = true }
+</code></pre>
+<ul>
+<li><a href="http://crates.io/crates/bevy">bevy</a> is the main engine dependency</li>
+<li><a href="http://crates.io/crates/colored">colored</a> will be used to print the board in the console in debug mode</li>
+<li><a href="http://crates.io/crates/bevy-inspector-egui">bevy-inspector-egui</a> so we can get the inspector compatibility for our components.</li>
+</ul>
+<blockquote>
+<p>Inspector GUI at the end of the tutorial:</p>
+<p><img src="docs/2_final_inspector_gui.png" alt="Inspector GUI" /></p>
+</blockquote>
+<p>We activate the debug crates through a <code>debug</code> feature gate.</p>
+<h3><a class="header" href="#librs" id="librs">lib.rs</a></h3>
+<p>Remove the generated code and create the plugin <code>struct</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/lib.rs
+pub struct BoardPlugin;
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#app-config" id="app-config">App config</a></h2>
+<h3><a class="header" href="#cargotoml-1" id="cargotoml-1">Cargo.toml</a></h3>
+<p>Add the following elements to the main <code>src/Cargo.toml</code> file:</p>
+<pre><code class="language-toml">[features]
+default = []
+debug = [&quot;board_plugin/debug&quot;, &quot;bevy-inspector-egui&quot;]
+
+[dependencies]
+bevy = &quot;0.6&quot;
+board_plugin = { path = &quot;board_plugin&quot; }
+
+# Hierarchy inspector debug
+bevy-inspector-egui = { version = &quot;0.8&quot;, optional = true }
+
+[workspace]
+members = [
+    &quot;board_plugin&quot;
+]
+</code></pre>
+<p>We use our lib as a dependency and add it to our <code>workspace</code>.</p>
+<h3><a class="header" href="#mainrs" id="mainrs">main.rs</a></h3>
+<p>Add the following to the <code>src/main.rs</code> file:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+
+#[cfg(feature = &quot;debug&quot;)]
+use bevy_inspector_egui::WorldInspectorPlugin;
+
+fn main() {
+    let mut app = App::new();
+    // Window setup
+    app.insert_resource(WindowDescriptor {
+        title: &quot;Mine Sweeper!&quot;.to_string(),
+        width: 700.,
+        height: 800.,
+        ..Default::default()
+    })
+    // Bevy default plugins
+    .add_plugins(DefaultPlugins);
+    #[cfg(feature = &quot;debug&quot;)]
+    // Debug hierarchy inspector
+    app.add_plugin(WorldInspectorPlugin::new());
+    // Startup system (cameras)
+    app.add_startup_system(camera_setup);
+    // Run the app
+    app.run();
+}
+
+fn camera_setup(mut commands: Commands) {
+    // 2D orthographic camera
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+</code></pre></pre>
+<p>Let's break it down:</p>
+<ul>
+<li>
+<p>The bevy <code>App</code> is the builder for all our game logic, allowing to register <em>systems</em>, <em>resources</em> and <em>plugins</em></p>
+</li>
+<li>
+<p>A bevy <code>Plugin</code> is a container of app building logic, a modular way to add <em>systems</em>  and <em>resources</em> to the application.</p>
+<p>For example, the <code>WorldInspectorPlugin</code> will register every <em>system</em> and <em>resource</em> required to display the GUI inspector.</p>
+</li>
+<li>
+<p>Bevy's <code>DefaultPlugins</code> is a collection of basic plugins providing basic engine features, like input handling, windows, transform, rendering..</p>
+</li>
+</ul>
+<p>We add one resource,<code>WindowDescriptor</code>to customize our window.</p>
+<blockquote>
+<p>How does adding resources makes anything ? They are just data !</p>
+</blockquote>
+<p>The resources are indeed <em>just</em> data, no logic. The <code>DefaultPlugins</code> register <em>systems</em> responsible for drawing the window using the <code>WindowDescriptor</code> resource as configuration.
+The resource is optional, because the systems with simply use default values if you don't set anything.</p>
+<p>Allowing extern customization through <em>resources</em> is what we will make with our <code>BoardPlugin</code>.</p>
+<h4><a class="header" href="#the-startup-system" id="the-startup-system">The startup system</a></h4>
+<p>We also register a <strong>Startup System</strong>: <code>camera_setup</code></p>
+<p>A classic <strong>system</strong> is run every frame, with optional run criteria like <em>Stages</em> or <em>FixedTimeSteps</em>.
+A <strong>Startup System</strong> is run only once, at the start.</p>
+<p>We register systems this way:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>app.add_system(my_function)
+<span class="boring">}
+</span></code></pre></pre>
+<p>This is the camera setup function:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn camera_setup(mut commands: Commands) {
+    // 2D orthographic camera
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>the <code>Commands</code> argument is the main ECS tool for every system that requires world editing, it allows to spawn and despawn entities, add components to entities, insert and remove resources, etc.</p>
+<blockquote>
+<p>So does every system have only one argument?</p>
+</blockquote>
+<p>Not at all, and the <code>Commands</code> argument is optional. Systems can have as many arguments as you want, but only ECS valid ones like:</p>
+<ul>
+<li><strong>Commands</strong> as we just saw (<code>Commands</code>)</li>
+<li><strong>Resources</strong> wrapped in <code>Res&lt;&gt;</code> or <code>ResMut&lt;&gt;</code> (can be assets, window or any inserted resource)</li>
+<li><strong>Component Queries</strong> (<code>Query&lt;&gt;</code>)</li>
+<li><strong>Event items</strong> (<code>EventReader&lt;&gt;</code> and <code>EventWriter&lt;&gt;</code>)</li>
+<li>etc.</li>
+</ul>
+<p>Bevy will automatically handle everything for you and provide your systems with the correct arguments.</p>
+<blockquote>
+<p>The systems &quot;spawns a bundle&quot;, what does that mean?</p>
+</blockquote>
+<p>We explained in the <a href="./introduction.html">intro</a> that in our in game world there are <strong>Entities</strong> with <strong>Components</strong> attached.</p>
+<p>To spawn an entity and add components we can do this:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn my_system(mut commands: Commands) {
+  // This spawns an entity and returns a builder
+  let entity = commands.spawn();
+  // We can add components to the entity
+  entity
+          .insert(MyComponent {})
+          .insert(MyOtherComponent {});
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>But for complex objects we use <strong>Bundles</strong> which contains a collection of <em>components</em> to add.</p>
+<p>This way we can do:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn my_system(mut commands: Commands) {
+  let entity = commands.spawn();
+  entity.insert_bundle(MyComponentBundle::new());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>or directly:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn my_system(mut commands: Commands) {
+  // This spawns an entity with all components in the bundle
+  commands.spawn_bundle(MyComponentBundle::new());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>In our system we spawn a camera entity with all the associated components to have a 2D orthographic camera.</p>
+<h2><a class="header" href="#run" id="run">Run</a></h2>
+<p>You can now run the app using</p>
+<ul>
+<li><code>cargo run</code>:
+Giving you an empty window</li>
+<li><code>cargo run --features debug</code>:</li>
+</ul>
+<p><img src="docs/2_inspector_gui.png" alt="Inspector GUI" /></p>
+<p>Showing the debug inspector, we can see our 2D camera entity, and the components inserted via the bundle.</p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="1_introduction.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="3_tile_map.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="1_introduction.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="3_tile_map.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

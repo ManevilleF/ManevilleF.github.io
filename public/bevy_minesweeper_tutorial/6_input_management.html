@@ -1,0 +1,470 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Input Manangement - Bevy Minesweeper Tutorial</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html" class="active"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#input-management" id="input-management">Input Management</a></h1>
+<p>We have a glorious board, but we can't interact with it, let's handle some input !</p>
+<h2><a class="header" href="#bounds" id="bounds">Bounds</a></h2>
+<p>To detect mouse input inside our board we will use common gamedev type called <code>Bounds</code>. It is strangely missing from bevy so we'll code a simple version for our plugin in <code>board_plugin/src/bounds.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// bounds.rs
+use bevy::prelude::Vec2;
+
+#[derive(Debug, Copy, Clone)]
+pub struct Bounds2 {
+    pub position: Vec2,
+    pub size: Vec2,
+}
+
+impl Bounds2 {
+    pub fn in_bounds(&amp;self, coords: Vec2) -&gt; bool {
+        coords.x &gt;= self.position.x
+            &amp;&amp; coords.y &gt;= self.position.y
+            &amp;&amp; coords.x &lt;= self.position.x + self.size.x
+            &amp;&amp; coords.y &lt;= self.position.y + self.size.y
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Ths structure defines a 2D rectangle and can check if coordinates are contained in its extents.</p>
+<p>Connect the file to <code>board_plugin/src/lib.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+mod bounds;
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#the-board-resource" id="the-board-resource">The Board resource</a></h2>
+<p>The tile map we generate in our <code>create_board</code> startup system is lost after that system, we need to put it in a <em>resource</em> for it to last.
+We also need to store our board <code>Bounds</code> for input detection.</p>
+<p>Let's create a <code>board.rs</code> in our <code>resources</code> folder:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// mod.rs
+// ..
+pub use board_options::*;
+
+mod board;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+use crate::bounds::Bounds2;
+use crate::{Coordinates, TileMap};
+use bevy::prelude::*;
+
+#[derive(Debug)]
+pub struct Board {
+    pub tile_map: TileMap,
+    pub bounds: Bounds2,
+    pub tile_size: f32,
+}
+
+impl Board {
+    /// Translates a mouse position to board coordinates
+    pub fn mouse_position(&amp;self, window: &amp;Window, position: Vec2) -&gt; Option&lt;Coordinates&gt; {
+        // Window to world space
+        let window_size = Vec2::new(window.width(), window.height());
+        let position = position - window_size / 2.;
+
+        // Bounds check
+        if !self.bounds.in_bounds(position) {
+            return None;
+        }
+        // World space to board space
+        let coordinates = position - self.bounds.position;
+        Some(Coordinates {
+            x: (coordinates.x / self.tile_size) as u16,
+            y: (coordinates.y / self.tile_size) as u16,
+        })
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Our <code>Board</code> resource stores a <code>TileMap</code>, the board <code>Bounds</code> and a <code>tile_size</code> which is the size of individual square tiles.</p>
+<p>We provide a method converting mouse position to our own coordinate system. This computation seems strange because unlike our entities <strong>world space</strong> where the origin
+is at the center of the screen (based on camera position), the <strong>window space</strong> origin is on the bottom left.</p>
+<p>So we have to transform the mouse position so that it matches our <strong>world space</strong>, check the bounds and then convert the coordinates into a tile coordinate.</p>
+<p>Now we defined our resource, we need to register it at the end of our <code>create_board</code> startup system</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bounds::Bounds2;
+use resources::Board;
+use bevy::math::Vec3Swizzles;
+
+// ..
+
+// We add the main resource of the game, the board
+        commands.insert_resource(Board {
+            tile_map,
+            bounds: Bounds2 {
+                position: board_position.xy(),
+                size: board_size,
+            },
+            tile_size,
+        });
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>Board</code> is now available for any <em>system</em>.</p>
+<h2><a class="header" href="#input-system" id="input-system">Input system</a></h2>
+<p>We can now create or first regular <em>system</em> which will check every frame for a mouse click event.</p>
+<p>Let's create a <code>systems</code> module in our board plugin with an <code>input.rs</code> file.</p>
+<blockquote>
+<p>Small hierarchy recap:</p>
+<pre><code>├── Cargo.lock
+├── Cargo.toml
+├── assets
+├── board_plugin
+│    ├── Cargo.toml
+│    └── src
+│         ├── bounds.rs
+│         ├── components
+│         │    ├── bomb.rs
+│         │    ├── bomb_neighbor.rs
+│         │    ├── coordinates.rs
+│         │    ├── mod.rs
+│         │    ├── uncover.rs
+│         ├── lib.rs
+│         ├── resources
+│         │    ├── board.rs
+│         │    ├── board_options.rs
+│         │    ├── mod.rs
+│         │    ├── tile.rs
+│         │    └── tile_map.rs
+│         └── systems
+│              ├── input.rs
+│              └── mod.rs
+├── src
+│    └── main.rs
+</code></pre>
+</blockquote>
+<p>Don't forget to connect the <code>systems</code> module in <code>lib.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod systems;
+<span class="boring">}
+</span></code></pre></pre>
+<p>and the <code>input</code> module in <code>systems/mod.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub mod input;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's define our input system !</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// input.rs
+use crate::Board;
+use bevy::input::{mouse::MouseButtonInput, ElementState};
+use bevy::log;
+use bevy::prelude::*;
+
+pub fn input_handling(
+    windows: Res&lt;Windows&gt;,
+    board: Res&lt;Board&gt;,
+    mut button_evr: EventReader&lt;MouseButtonInput&gt;,
+) {
+    let window = windows.get_primary().unwrap();
+
+    for event in button_evr.iter() {
+        if let ElementState::Pressed = event.state {
+            let position = window.cursor_position();
+            if let Some(pos) = position {
+                log::trace!(&quot;Mouse button pressed: {:?} at {}&quot;, event.button, pos);
+                let tile_coordinates = board.mouse_position(window, pos);
+                if let Some(coordinates) = tile_coordinates {
+                    match event.button {
+                        MouseButton::Left =&gt; {
+                            log::info!(&quot;Trying to uncover tile on {}&quot;, coordinates);
+                            // TODO: generate an event
+                        }
+                        MouseButton::Right =&gt; {
+                            log::info!(&quot;Trying to mark tile on {}&quot;, coordinates);
+                            // TODO: generate an event
+                        }
+                        _ =&gt; (),
+                    }
+                }
+            }
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>This function is our input <em>system</em>, it takes three arguments:</p>
+<ul>
+<li>a <code>Windows</code> resource</li>
+<li>our own <code>Board</code> resource</li>
+<li>a <code>MouseButtonInput</code> event reader</li>
+</ul>
+<p>We iterate throught the event reader to retrieve every event, keeping only <code>Pressed</code> events.
+We retrieve the mouse position and use our <code>Board</code> to convert the mouse position into tile coordinates
+and then we log the action (uncover or mark) according to the mouse button.</p>
+<blockquote>
+<p>So if we press an other button we will still perform the conversion?</p>
+</blockquote>
+<p>Yes, we could check the buttons first to optimize a bit but it would make the code less clear for a tutorial.</p>
+<p>We can now register our system in our <code>BoardPlugin::build()</code> method:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+// ..
+//    app.add_startup_system(Self::create_board)
+        .add_system(systems::input::input_handling);
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Running the app you can now use your left and right click buttons on the window and notice that:</p>
+<ul>
+<li>If you click on the board it logs the coordinates and the action</li>
+<li>If you click outside the board or with another button, nothing happens</li>
+</ul>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="5_tiles&amp;components.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="7_uncovering.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="5_tiles&amp;components.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="7_uncovering.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

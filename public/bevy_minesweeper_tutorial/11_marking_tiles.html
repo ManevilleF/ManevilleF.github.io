@@ -1,0 +1,512 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Marking Tiles - Bevy Minesweeper Tutorial</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html" class="active"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#marking-tiles" id="marking-tiles">Marking tiles</a></h1>
+<p>Our minesweeper plugin is almost done, we still miss a very important feature: Marking tiles.
+Also, you may notice that the app is quite slow, especially with large tile maps. Let's fix that first.</p>
+<h2><a class="header" href="#optimizations" id="optimizations">Optimizations</a></h2>
+<p>Add the following <a href="https://bevy-cheatbook.github.io/pitfalls/performance.html">optimization levels</a> in our app's <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml"># Enable optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package.&quot;*&quot;]
+opt-level = 3
+
+# Maybe also enable only a small amount of optimization for our code:
+[profile.dev]
+opt-level = 1
+</code></pre>
+<p><em>This won't enable as many optimizations as a <code>release</code> build, but you should notice significant improvements</em></p>
+<h2><a class="header" href="#events" id="events">Events</a></h2>
+<p>To complete the gameplay we need to provide three additional events in our <code>board_plugin/src/events.rs</code>.</p>
+<h3><a class="header" href="#board-completed-event" id="board-completed-event">Board completed event</a></h3>
+<p>This event will be sent at the board completion, allowing apps using our plugin to detect victory and maybe trigger some elements (victory screen, score, etc)</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Copy, Clone)]
+pub struct BoardCompletedEvent;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#bomb-explosion-event" id="bomb-explosion-event">Bomb explosion event</a></h3>
+<p>This event will be sent every time the player uncovers a bomb, allowing apps using our plugin to detect it.
+Our plugin won't interrupt the game itself, by doing an event instead we allow apps to maybe trigger loss at 3 bombs or immediately.
+This method is much more modular than adding a configuration.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Copy, Clone)]
+pub struct BombExplosionEvent;
+<span class="boring">}
+</span></code></pre></pre>
+<h3><a class="header" href="#tile-mark-event" id="tile-mark-event">Tile mark event</a></h3>
+<p>This event is the equivalent of <code>TileTriggerEvent</code> but for the right click.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Copy, Clone)]
+pub struct TileMarkEvent(pub Coordinates);
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#resources" id="resources">Resources</a></h2>
+<p>Let's edit our <code>Board</code> resource to handle tile marking (flags):</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+use bevy::log;
+
+#[derive(Debug)]
+pub struct Board {
+    // ..
+    pub marked_tiles: Vec&lt;Coordinates&gt;,
+}
+
+impl Board {
+    // ..
+
+    /// Removes the `coords` from `marked_tiles`
+    fn unmark_tile(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;Coordinates&gt; {
+        let pos = match self.marked_tiles.iter().position(|a| a == coords) {
+            None =&gt; {
+                log::error!(&quot;Failed to unmark tile at {}&quot;, coords);
+                return None;
+            }
+            Some(p) =&gt; p,
+        };
+        Some(self.marked_tiles.remove(pos))
+    }
+
+    /// Is the board complete
+    pub fn is_completed(&amp;self) -&gt; bool {
+        self.tile_map.bomb_count() as usize == self.covered_tiles.len()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>We add:</p>
+<ul>
+<li>a new field storing the various marked coordinates</li>
+<li>a public method checking the board completion.</li>
+<li>a private method to remove coordinates from the new field</li>
+</ul>
+<p>Let's edit the <code>tile_to_uncover</code>method  and check for marked tiles:</p>
+<pre><code class="language-diff">// board.rs
+pub fn tile_to_uncover(&amp;self, coords: &amp;Coordinates) -&gt; Option&lt;&amp;Entity&gt; {
++   if self.marked_tiles.contains(coords) {
++       None
++   } else {
+        self.covered_tiles.get(coords)
++   }
+}
+</code></pre>
+<p>Instead of directly returning the covered tile entity, we check if the tile is marked. This will prevent uncovering marked tiles by clicking on it.</p>
+<p>Let's change the <code>try_uncover_tile</code> method as well to remove the marked coordinates on uncovering.</p>
+<pre><code class="language-diff">// board.rs
+pub fn try_uncover_tile(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;Entity&gt; {
+ +   if self.marked_tiles.contains(coords) {
+ +      self.unmark_tile(coords)?;
+ +  }
+    self.covered_tiles.remove(coords)
+}
+</code></pre>
+<p>We can now create the <code>try_toggle_mark</code> method:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+
+    /// We try to mark or unmark a tile, returning the entity and if the tile is marked
+    pub fn try_toggle_mark(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;(Entity, bool)&gt; {
+        let entity = *self.covered_tiles.get(coords)?;
+        let mark = if self.marked_tiles.contains(coords) {
+            self.unmark_tile(coords)?;
+            false
+        } else {
+            self.marked_tiles.push(*coords);
+            true
+        };
+        Some((entity, mark))
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<h2><a class="header" href="#systems" id="systems">Systems</a></h2>
+<h3><a class="header" href="#uncover" id="uncover">Uncover</a></h3>
+<p>Let's edit our uncovering system to check for board completion.</p>
+<p>We also need to send our new <code>BombExplosionEvent</code>.</p>
+<pre><code class="language-diff">// uncover.rs
++ use crate::{BoardCompletedEvent, BombExplosionEvent};
+
+pub fn uncover_tiles(
+    // ..
++   mut board_completed_event_wr: EventWriter&lt;BoardCompletedEvent&gt;,
++   mut bomb_explosion_event_wr: EventWriter&lt;BombExplosionEvent&gt;,
+) {
+    // match board.try_uncover_tile(coords) {}
+    // ..
++   if board.is_completed() {
++       log::info!(&quot;Board completed&quot;);
++       board_completed_event_wr.send(BoardCompletedEvent);
++   }
+    if bomb.is_some() {
+        log::info!(&quot;Boom !&quot;);
+-       // TODO: generate an event
++       bomb_explosion_event_wr.send(BombExplosionEvent);
+    }
+    //..
+}
+</code></pre>
+<h3><a class="header" href="#input" id="input">Input</a></h3>
+<p>Let's edit our <code>input_handling</code> system and send our new event for a <em>right click</em>:</p>
+<pre><code class="language-diff">// input.rs
++ use crate::TileMarkEvent;
+
+pub fn input_handling(
+    // ..
++   mut tile_mark_ewr: EventWriter&lt;TileMarkEvent&gt;,
+) {
+    // ..
+-   // TODO: generate an event
++   tile_mark_ewr.send(TileMarkEvent(coordinates));
+    // ..
+}
+</code></pre>
+<h3><a class="header" href="#mark" id="mark">Mark</a></h3>
+<p>Let's create a <code>mark</code> module in our plugin <code>systems</code> with a <code>mark_tiles</code> system:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// systems/mod.rs
+pub mod mark;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// mark.rs
+se crate::{Board, BoardAssets, TileMarkEvent};
+use bevy::log;
+use bevy::prelude::*;
+
+pub fn mark_tiles(
+    mut commands: Commands,
+    mut board: ResMut&lt;Board&gt;,
+    board_assets: Res&lt;BoardAssets&gt;,
+    mut tile_mark_event_rdr: EventReader&lt;TileMarkEvent&gt;,
+    query: Query&lt;&amp;Children&gt;,
+) {
+    for event in tile_mark_event_rdr.iter() {
+        if let Some((entity, mark)) = board.try_toggle_mark(&amp;event.0) {
+            if mark {
+                commands.entity(entity).with_children(|parent| {
+                    parent
+                        .spawn_bundle(SpriteBundle {
+                            texture: board_assets.flag_material.texture.clone(),
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::splat(board.tile_size)),
+                                color: board_assets.flag_material.color,
+                                ..Default::default()
+                            },
+                            transform: Transform::from_xyz(0., 0., 1.),
+                            ..Default::default()
+                        })
+                        .insert(Name::new(&quot;Flag&quot;));
+                });
+            } else {
+                let children = match query.get(entity) {
+                    Ok(c) =&gt; c,
+                    Err(e) =&gt; {
+                        log::error!(&quot;Failed to retrieve flag entity components: {}&quot;, e);
+                        continue;
+                    }
+                };
+                for child in children.iter() {
+                    commands.entity(*child).despawn_recursive();
+                }
+            }
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>We have familiar arguments, and a new <code>Query</code> on <code>Children</code> entities which we will use for children of <em>tile cover</em> entities (flags).</p>
+<blockquote>
+<p><strong>Note:</strong> <em>This query could be optimized with a new <code>TileCover</code> component, therefore avoiding querying every entity with children</em></p>
+</blockquote>
+<p>The function iterates through our <code>TileMarkEvent</code> reader and will attempt to toggle marks on the <code>Board</code> resource.
+If the tile is marked, we spawn a flag sprite, using the <code>BoardAssets</code>, otherwise we despawn all tile cover children.
+We could store entity references or use a custom <code>Flag</code> component to avoid this hard despawn operation, but we won't add any other children to the tile cover entities.</p>
+<h2><a class="header" href="#plugin" id="plugin">Plugin</a></h2>
+<p>Let's register our new events and systems:</p>
+<pre><code class="language-diff">// lib.rs
+
+impl&lt;T: StateData&gt; Plugin for BoardPlugin&lt;T&gt; {
+    fn build(&amp;self, app: &amp;mut AppBuilder) {
+        // ..
+        // We handle uncovering even if the state is inactive
+        .add_system_set(
+            SystemSet::on_in_stack_update(self.running_state.clone())
+                .with_system(systems::uncover::uncover_tiles)
++               .with_system(systems::mark::mark_tiles), // We add our new mark system
+        )
+        .add_system_set(
+            SystemSet::on_exit(self.running_state.clone()).with_system(Self::cleanup_board),
+        )
+        .add_event::&lt;TileTriggerEvent&gt;()
++       .add_event::&lt;TileMarkEvent&gt;()
++       .add_event::&lt;BombExplosionEvent&gt;()
++       .add_event::&lt;BoardCompletedEvent&gt;();
+    }
+}
+
+impl&lt;T&gt; Board&lt;T&gt; {
+    fn setup_board(
+        // ..
+    ) {
+        // ..
+        commands.insert_resource(Board {
+            // ..
++           marked_tiles: Vec::new(),
+            // ..
+        })
+
+    }
+}
+</code></pre>
+<p>That's it ! We have a complete Minesweeper plugin !</p>
+<p><img src="docs/11_board.png" alt="Gameplay" /></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="10_assets.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="12_wasm_build.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="10_assets.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="12_wasm_build.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

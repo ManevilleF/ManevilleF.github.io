@@ -1,0 +1,551 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Uncovering Tiles - Bevy Minesweeper Tutorial</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Bevy tutorial to build a simple 2D Minesweeper">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2_setup.html"><strong aria-hidden="true">2.</strong> Project Set Up</a></li><li class="chapter-item expanded "><a href="3_tile_map.html"><strong aria-hidden="true">3.</strong> Tile Map Generation</a></li><li class="chapter-item expanded "><a href="4_the_board.html"><strong aria-hidden="true">4.</strong> The Board</a></li><li class="chapter-item expanded "><a href="5_tiles&components.html"><strong aria-hidden="true">5.</strong> Tiles And Components</a></li><li class="chapter-item expanded "><a href="6_input_management.html"><strong aria-hidden="true">6.</strong> Input Manangement</a></li><li class="chapter-item expanded "><a href="7_uncovering.html" class="active"><strong aria-hidden="true">7.</strong> Uncovering Tiles</a></li><li class="chapter-item expanded "><a href="8_safe_start.html"><strong aria-hidden="true">8.</strong> Safe Start</a></li><li class="chapter-item expanded "><a href="9_generic_states.html"><strong aria-hidden="true">9.</strong> Generic States</a></li><li class="chapter-item expanded "><a href="10_assets.html"><strong aria-hidden="true">10.</strong> Assets</a></li><li class="chapter-item expanded "><a href="11_marking_tiles.html"><strong aria-hidden="true">11.</strong> Marking Tiles</a></li><li class="chapter-item expanded "><a href="12_wasm_build.html"><strong aria-hidden="true">12.</strong> Build to WASM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Bevy Minesweeper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <blockquote>
+<p><a href="https://gitlab.com/qonfucius/minesweeper-tutorial">Check the repository</a></p>
+</blockquote>
+<h1><a class="header" href="#uncovering-tiles" id="uncovering-tiles">Uncovering Tiles</a></h1>
+<p>To cover our tiles we will simply add a child entity for each tile with a sprite, hiding what's below.
+We will use the <code>Uncover</code> component set up in <a href="./4_tiles&amp;components.html">part 4</a> for uncovering.</p>
+<h2><a class="header" href="#board-resource" id="board-resource">Board resource</a></h2>
+<p>To uncover the tiles we will need to store references to each covering entity, let's edit our <code>Board</code> resource:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board.rs
+use bevy::utils::HashMap;
+
+#[derive(Debug)]
+pub struct Board {
+    // ..
+    pub covered_tiles: HashMap&lt;Coordinates, Entity&gt;,
+}
+
+impl Board {
+    // ..
+
+    /// Retrieves a covered tile entity
+    pub fn tile_to_uncover(&amp;self, coords: &amp;Coordinates) -&gt; Option&lt;&amp;Entity&gt; {
+      self.covered_tiles.get(coords)
+    }
+
+    /// We try to uncover a tile, returning the entity
+    pub fn try_uncover_tile(&amp;mut self, coords: &amp;Coordinates) -&gt; Option&lt;Entity&gt; {
+        self.covered_tiles.remove(coords)
+    }
+
+    /// We retrieve the adjacent covered tile entities of `coord`
+    pub fn adjacent_covered_tiles(&amp;self, coord: Coordinates) -&gt; Vec&lt;Entity&gt; {
+        self.tile_map
+            .safe_square_at(coord)
+            .filter_map(|c| self.covered_tiles.get(&amp;c))
+            .copied()
+            .collect()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Instead of making some complex new tile map we will use a <code>HashMap</code> containing the entities. <code>Entity</code> being a simple identifier implements <code>Copy</code> and <code>Clone</code>, so can be duplicated and stored safely.
+Every time we uncover a tile we will remove the entity from our map.</p>
+<p>We provide three methods:</p>
+<ul>
+<li><code>tile_to_uncover</code> to retrieve a covered tile entity at some tile coordinates</li>
+<li><code>try_uncover_tile</code> which removes the entity from the map if a covered tile entity exists at the given coordinates</li>
+<li><code>adjacent_covered_tiles</code> which allows to retrieve all covered tile in a square around some coordinates.</li>
+</ul>
+<h2><a class="header" href="#tile-cover" id="tile-cover">Tile cover</a></h2>
+<p>We edit our <code>spawn_tiles</code> function to add the following arguments:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bevy::utils::HashMap;
+
+// ..
+    fn spawn_tiles(
+        // ..
+        covered_tile_color: Color,
+        covered_tiles: &amp;mut HashMap&lt;Coordinates, Entity&gt;,
+    )
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>and we can add the tile cover creation for every tile:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+
+// ..
+    // .insert(coordinates);
+    // We add the cover sprites
+    cmd.with_children(|parent| {
+                    let entity = parent
+                        .spawn_bundle(SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::splat(size - padding)),
+                                color: covered_tile_color,
+                                ..Default::default()
+                            },
+                            transform: Transform::from_xyz(0., 0., 2.),
+                            ..Default::default()
+                        })
+                        .insert(Name::new(&quot;Tile Cover&quot;))
+                        .id();
+                    covered_tiles.insert(coordinates, entity);
+                });
+    // match tile {
+//.. 
+<span class="boring">}
+</span></code></pre></pre>
+<hr />
+<p>Let's edit our <code>setup_board</code> system accordingly:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use bevy::utils::{AHashExt, HashMap};
+
+// ..
+let mut covered_tiles =
+            HashMap::with_capacity((tile_map.width() * tile_map.height()).into());
+// ..
+Self::spawn_tiles(
+    //..
+    Color::DARK_GRAY,
+    &amp;mut covered_tiles
+);
+// ..
+commands.insert_resource(Board {
+    //..
+    covered_tiles,
+})
+// ..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Now, each <em>board tile</em> will have a child &quot;Tile Cover&quot; entity with a sprite hiding it.</p>
+<p><img src="docs/7_inspector_gui.png" alt="Inspector GUI" /></p>
+<h2><a class="header" href="#events" id="events">Events</a></h2>
+<p>As shown in the <a href="./5_input&amp;resource.html">previous part</a> we want to send an event when a tile is clicked.
+an <strong>event</strong> is like a <strong>resource</strong> but available for 1 frame. (<a href="https://bevy-cheatbook.github.io/programming/events.html">see more about events</a>)</p>
+<p>Let's create an <code>events.rs</code> module for our <code>board_plugin</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/events.rs
+use crate::components::Coordinates;
+
+#[derive(Debug, Copy, Clone)]
+pub struct TileTriggerEvent(pub Coordinates);
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// board_plugin/src/lib.rs
+mod events;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Just like <strong>components</strong> and <strong>resources</strong>, <strong>events</strong> can be any rust type.
+Here we choose to have an event containing the board coordinates of the tile to uncover.</p>
+<h2><a class="header" href="#systems" id="systems">Systems</a></h2>
+<h3><a class="header" href="#input" id="input">Input</a></h3>
+<p>Let's edit our <code>input_handling</code> system and send our new event for a <em>left click</em>:</p>
+<pre><code class="language-diff">// input.rs
++ use crate::events::TileTriggerEvent;
+
+pub fn input_handling(
+    // ..
++   mut tile_trigger_ewr: EventWriter&lt;TileTriggerEvent&gt;,
+) {
+    // ..
+    // log::info!(&quot;Trying to uncover tile on {}&quot;, coordinates);
+-   // TODO: generate an event
++   tile_trigger_ewr.send(TileTriggerEvent(coordinates));
+    // ..
+}
+</code></pre>
+<p>We add a new argument, an <code>EventWriter</code> for our new event, and replace our <em>TODO</em> with the sending code.
+Now every time we use our left mouse button on the board, a <code>TileTriggerEvent</code> is sent.</p>
+<h3><a class="header" href="#uncover" id="uncover">Uncover</a></h3>
+<h4><a class="header" href="#trigger-event-handler" id="trigger-event-handler">Trigger event handler</a></h4>
+<p>We can now create a system listening to our new event. Let's create an <code>uncover.rs</code> file in our <code>systems</code> module:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// systems/mod.rs
+pub mod uncover;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// systems/uncover.rs
+use bevy::prelude::*;
+use crate::{Board, Bomb, BombNeighbor, Coordinates, Uncover};
+use crate::events::TileTriggerEvent;
+
+pub fn trigger_event_handler(
+    mut commands: Commands,
+    board: Res&lt;Board&gt;,
+    mut tile_trigger_evr: EventReader&lt;TileTriggerEvent&gt;,
+) {
+    for trigger_event in tile_trigger_evr.iter() {
+        if let Some(entity) = board.tile_to_uncover(&amp;trigger_event.0) {
+            commands.entity(*entity).insert(Uncover);
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Like our input system we iterate through <code>TileTriggerEvent</code> events.
+For each of these events we check if the tile is covered, and if it is we add an <code>Uncover</code> component to it.</p>
+<h4><a class="header" href="#uncover-tiles" id="uncover-tiles">Uncover tiles</a></h4>
+<p>Now let's make an other system using this <code>Uncover</code> component:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+
+pub fn uncover_tiles(
+    mut commands: Commands,
+    mut board: ResMut&lt;Board&gt;,
+    children: Query&lt;(Entity, &amp;Parent), With&lt;Uncover&gt;&gt;,
+    parents: Query&lt;(&amp;Coordinates, Option&lt;&amp;Bomb&gt;, Option&lt;&amp;BombNeighbor&gt;)&gt;,
+) {
+    
+}
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p>Our first <strong>query</strong> !</p>
+</blockquote>
+<p>The arguments:</p>
+<ul>
+<li><code>commands</code>, as usual for entity manipulation</li>
+<li><code>board</code> our <code>Board</code> resource but with mutable access (<code>ResMut</code>)</li>
+<li><code>Query&lt;(Entity, &amp;Parent), With&lt;Uncover&gt;&gt;</code> : We query both <code>Entity</code> and <code>Parent</code> for every entity having an <code>Uncover</code> component.</li>
+<li><code>Query&lt;(&amp;Coordinates, Option&lt;&amp;Bomb&gt;, Option&lt;&amp;BombNeighbor&gt;)&gt;</code>: We query every <code>Coordinate</code> component and maybe <code>Bomb</code> and <code>BombNeighbor</code> components.</li>
+</ul>
+<p>There are two ways to get data from queries, to <em>iterate</em> through it or to <em>get</em> the queried components from a specified entity. (<a href="https://bevy-cheatbook.github.io/programming/queries.html">see more about queries</a>)</p>
+<p>Let's iterate through the <code>children</code> query:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+// ..
+    // We iterate through tile covers to uncover
+    for (entity, parent) in children.iter() {
+        // we destroy the tile cover entity
+        commands
+            .entity(entity)
+            .despawn_recursive();
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>We get every <code>Entity</code> of tile covers and the <code>Parent</code> (parent entity) from the query.
+We retrieve the tile cover entity commands from <code>Commands</code> and we destroy the entity</p>
+<blockquote>
+<p>Why <code>despawn_recursive</code>?</p>
+</blockquote>
+<p>This method will also despawn potential child entities and will <em>unlink</em> the tile cover from the board tile entity.</p>
+<p>Okay, we destroy the triggered tile cover, but we need to check wich <em>board tile</em> was actually triggered, and get its coordinates.
+Let's get the parent components from the second query:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+use bevy::log;
+
+// ..
+    let (coords, bomb, bomb_counter) = match parents.get(parent.0) {
+        Ok(v) =&gt; v,
+        Err(e) =&gt; {
+            log::error!(&quot;{}&quot;, e);
+            continue;
+        }
+    };
+<span class="boring">}
+</span></code></pre></pre>
+<p>We now have the <em>board tile</em> (the tile cover parent) <code>Coordinates</code> component and two <code>Option&lt;&gt;</code> for their potential <code>Bomb</code> and <code>BombNeighbor</code> components.</p>
+<p>Let's complete our function:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// uncover.rs
+// ..
+    // We remove the entity from the board covered tile map
+    match board.try_uncover_tile(coords) {
+        None =&gt; log::debug!(&quot;Tried to uncover an already uncovered tile&quot;),
+        Some(e) =&gt; log::debug!(&quot;Uncovered tile {} (entity: {:?})&quot;, coords, e),
+    }
+    if bomb.is_some() {
+        log::info!(&quot;Boom !&quot;);
+        // TODO: Add explosion event
+    }
+    // If the tile is empty..
+    else if bomb_counter.is_none() {
+        // .. We propagate the uncovering by adding the `Uncover` component to adjacent tiles
+        // which will then be removed next frame
+        for entity in board.adjacent_covered_tiles(*coords) {
+            commands.entity(entity).insert(Uncover);
+        }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>Since we <em>despawn</em> the triggered cover tile entity, we need to remove it from our <code>Board</code> calling <code>try_uncover_tile</code>.
+We also check if the board tile is a <strong>bomb</strong> and log <em>Boom !</em>.</p>
+<p>The final part will insert a new <code>Uncover</code> component to adjacent tile covers <strong>if</strong> the parent <em>board tile</em> is neither a <strong>bomb</strong> nor a <strong>bomb neighbor</strong>.
+This operation will propagate the uncovering process to the adjacent cover tiles for the next frame.
+This is not necessarily optimal, but it <em>delays computations</em>.</p>
+<p>All that is left is to register our new systems and our event to our <code>App</code> in <code>BoardPlugin</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+use crate::events::*;
+
+// ..
+//   .add_system(systems::input::input_handling)
+    .add_system(systems::uncover::trigger_event_handler)
+    .add_system(systems::uncover::uncover_tiles)
+    .add_event::&lt;TileTriggerEvent&gt;();
+//..
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's run our app !</p>
+<p><img src="docs/7_uncovering.gif" alt="Uncover GIF" /></p>
+<hr />
+<p>Author: Félix de Maneville
+Follow me on <a href="https://twitter.com/ManevilleF">Twitter</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="6_input_management.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="8_safe_start.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="6_input_management.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="8_safe_start.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
