@@ -12,7 +12,7 @@ src = "."
 edition = "2021"
 
 [build]
-build-dir = "../../public/bevy_minesweeper_tutorial"
+build-dir = "../../docs/bevy_minesweeper_tutorial"
 create-missing = false
 
 [preprocessor.graphviz]
